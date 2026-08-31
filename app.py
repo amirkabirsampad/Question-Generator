@@ -9,6 +9,7 @@ import json
 import traceback
 import hashlib
 import time
+from PyPDF2 import PdfReader
 
 try:
     import arabic_reshaper
@@ -31,9 +32,8 @@ processing_requests = {}
 # DeepSeek Configuration
 try:
     client = OpenAI(
-        base_url="https://openrouter.ai/api/v1",
-        api_key=os.getenv('OPENROUTER_API_KEY'),
-    )
+        api_key=os.environ.get('API_KEY'),
+        base_url="https://api.deepseek.com")
     print("✅ OpenAI configuration set for DeepSeek/OpenRouter")
 except Exception as e:
     print(f"❌ خطا در تنظیم OpenAI: {e}")
@@ -154,9 +154,14 @@ def generate_questions_with_ai(text, subject, grade, chapter, count,testmode = F
         }} 
             """
             response = client.chat.completions.create(
-                model="x-ai/grok-4.3", # ⭐️ استفاده از یک مدل رایگان و سریع‌تر در OpenRouter
-                messages=[{"role": "user", "content": prompt}],
-                # extra_body={"reasoning": {"enabled": True}}
+                model="	deepseek-v4-flash",
+                messages=[
+                    {"role": "system", "content": "You are a helpful assistant"},
+                    {"role": "user", "content": "Hello"},
+                ],
+                stream=False,
+                reasoning_effort="high",
+                extra_body={"thinking": {"type": "enabled"}}
             )
             print("✅ پاسخ از AI دریافت شد")
             result = response.choices[0].message.content.strip()
