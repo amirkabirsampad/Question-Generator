@@ -1,1 +1,0 @@
-git remote set-url origin <URL جدید ریپو>
