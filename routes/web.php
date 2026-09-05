@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AiQuestionController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Teams\TeamInvitationController;
 use App\Http\Middleware\EnsureTeamMembership;
@@ -30,6 +31,7 @@ Route::get('/main/editor', function () {
     return view('main.editor'); // نام فایل: main/index.blade.php
 });
 
-
+Route::post('/api/generate-questions', [AiQuestionController::class, 'generate'])
+    ->name('ai.generate');
 
 require __DIR__.'/settings.php';

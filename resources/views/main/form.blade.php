@@ -399,11 +399,14 @@
             padding: 0 0.75rem;
         }
 
-        /* Loading Spinner */
         .loading {
             display: none;
             text-align: center;
             margin-top: 2rem;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
         }
 
         .spinner-border {
@@ -413,19 +416,13 @@
             border-top-color: #667eea;
             border-radius: 50%;
             animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
+            margin: 0 auto;
         }
 
         .loading p {
-            margin-top: 1rem;
-            color: var(--text-primary);
-            font-weight: 600;
-            font-size: 1.05rem;
+            margin-top: 0;
+            text-align: center;
+            width: 100%;
         }
 
         /* Alert Messages */
@@ -908,6 +905,9 @@
         }
 
         .loading {
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             text-align: center;
             color: #666;
         }
@@ -928,6 +928,7 @@
             margin-top: 8px;
         }
     </style>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
     <script src="/_sdk/element_sdk.js" type="text/javascript"></script>
     <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
@@ -1089,135 +1090,272 @@
         </main>
     </div>
     <script src="{{ asset('asset/js/dark-mode.js') }}"></script>
-    <script src="{{ asset('asset/js/extaract-txt.js') }}"></script>
+    {{-- <script src="{{ asset('asset/js/extaract-txt.js') }}"></script> --}}
     <script>
-        document.getElementById('questionForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
+        (function() {
+            'use strict';
 
-            const submitBtn = document.getElementById('submitBtn');
-            const loading = document.getElementById('loading');
-            const loadingTxt = document.querySelector('#loading p');
-
-            // ── مقادیر فرم ──
-            const grade = document.getElementById('grade').value.trim();
-            const field = document.getElementById('field_of_study').value.trim();
-            const bookUrl = document.getElementById('book_url').value.trim(); // ← مسیر txt local
-            const bookName = document.getElementById('book_name').value.trim();
-            const chapter = document.getElementById('chapter').value.trim();
-            const count = document.getElementById('count').value;
-            const schoolName = document.getElementById('school_name').value.trim();
-            const teacherName = document.getElementById('teacher_name').value.trim();
-
-            // ── اعتبارسنجی ──
-            if (!grade) return showAlert('پایه تحصیلی را انتخاب کنید!', 'danger');
-            if (parseInt(grade) >= 10 && !field) return showAlert('رشته تحصیلی را انتخاب کنید!', 'danger');
-            if (!bookUrl) return showAlert('یک کتاب درسی انتخاب کنید!', 'danger');
-
-            try {
-                submitBtn.disabled = true;
-                loading.style.display = 'flex';
-
-                // ── مرحله ۱: خواندن مستقیم فایل txt ──
-                loadingTxt.innerText = '📄 در حال خواندن متن کتاب...';
-                const response = await fetch(bookUrl);
-                if (!response.ok) throw new Error(`فایل کتاب یافت نشد (${response.status})`);
-
-                const extractedText = await response.text();
-
-                if (!extractedText || extractedText.trim().length < 50)
-                    throw new Error('متن کتاب خالی یا ناقص است.');
-
-                console.log('📖 طول متن:', extractedText.length, 'کاراکتر');
-
-                // ── مرحله ۲: ساخت پرامپت ──
-                loadingTxt.innerText = '🧠 در حال ساخت پرامپت...';
-                const prompt = buildPrompt(extractedText, bookName, grade, field, chapter, count);
-
-                // ── مرحله ۳: ارسال به AI ──
-                loadingTxt.innerText = '⏳ هوش مصنوعی در حال تولید سوالات...';
-                const aiResponse = await ai(prompt);
-
-                // ── مرحله ۴: پارس JSON ──
-                const parsed = parseAIResponse(aiResponse);
-                if (!parsed?.questions) {
-                    console.warn('پاسخ خام AI:', aiResponse);
-                    throw new Error('پاسخ AI در فرمت JSON مورد انتظار نبود.');
-                }
-
-                // ── مرحله ۵: ذخیره در localStorage ──
-                const finalOutput = {
-                    meta: {
-                        bookName,
-                        grade,
-                        field,
-                        chapter,
-                        schoolName,
-                        teacherName,
-                        generatedAt: new Date().toISOString(),
-                        sourceFile: bookUrl,
-                    },
-                    questions: parsed.questions
-                };
-                localStorage.setItem('ai_quiz_output', JSON.stringify(finalOutput, null, 2));
-
-                // ── مرحله ۶: نمایش سوالات ──
-                displayQuestions(parsed.questions, schoolName, teacherName, finalOutput.meta);
-                showAlert(`✅ ${parsed.questions.length} سوال تولید شد!`, 'success');
-
-            } catch (err) {
-                console.error(err);
-                showAlert('❌ ' + err.message, 'danger');
-            } finally {
-                submitBtn.disabled = false;
-                loading.style.display = 'none';
-
-                const alertEl = document.getElementById('alertContainer');
-                if (alertEl) alertEl.style.display = '';
+            function log(...args) {
+                console.log('[سوال‌ساز]', ...args);
             }
-        });
 
+            function logError(...args) {
+                console.error('[سوال‌ساز ERROR]', ...args);
+            }
 
-        // ══ فیلتر ورودی فصل — عدد + کاما ══════════════════════════
-        const chapterInput = document.getElementById('chapter');
+            async function fetchWithTimeout(url, options = {}, timeoutMs = 30000) {
+                const controller = new AbortController();
+                const timer = setTimeout(() => controller.abort(), timeoutMs);
+                try {
+                    return await fetch(url, {
+                        ...options,
+                        signal: controller.signal
+                    });
+                } catch (err) {
+                    if (err.name === 'AbortError') {
+                        throw new Error('درخواست بعد از ' + (timeoutMs / 1000) + ' ثانیه قطع شد (timeout):\n' +
+                        url);
+                    }
+                    throw err;
+                } finally {
+                    clearTimeout(timer);
+                }
+            }
 
-        chapterInput.addEventListener('keydown', function(e) {
-            const allowed = ['Backspace', 'Delete', 'Tab', 'Enter', 'Escape', 'Home', 'End', 'ArrowLeft',
-                'ArrowRight'
-            ];
-            if (allowed.includes(e.key) || e.ctrlKey || e.metaKey) return;
+            function showAlert(message, type) {
+                type = type || 'info';
+                let box = document.getElementById('alertContainer');
+                if (!box) {
+                    box = document.createElement('div');
+                    box.id = 'alertContainer';
+                    const form = document.getElementById('questionForm');
+                    if (form && form.parentNode) form.parentNode.insertBefore(box, form.nextSibling);
+                    else document.body.appendChild(box);
+                }
+                box.innerHTML =
+                    '<div class="alert alert-' + type + '" role="alert" style="white-space:pre-wrap;direction:rtl;">' +
+                    message +
+                    '</div>';
+                box.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'nearest'
+                });
+                log('Alert [' + type + ']:', message);
+            }
 
-            if (e.key === ' ' || e.key === '-') {
-                e.preventDefault();
-                insertComma(this);
+            const form = document.getElementById('questionForm');
+            if (!form) {
+                logError('فرم questionForm پیدا نشد!');
                 return;
             }
 
-            if (!/[\d,]/.test(e.key)) e.preventDefault();
-        });
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                e.stopImmediatePropagation(); // جلوگیری از listenerهای دیگر
+                log('Submit شروع شد');
 
-        chapterInput.addEventListener('input', function() {
-            const pos = this.selectionStart;
-            let val = this.value;
+                const submitBtn = document.getElementById('submitBtn');
+                const loading = document.getElementById('loading');
+                const loadingTxt = document.querySelector('#loading p');
 
-            val = val.replace(/[^\d,]/g, ',');
-            val = val.replace(/,{2,}/g, ',');
-            val = val.replace(/^,/, '');
+                const grade = (document.getElementById('grade')?.value || '').trim();
+                const field = (document.getElementById('field_of_study')?.value || '').trim();
+                const bookUrl = (document.getElementById('book_url')?.value || '').trim();
+                const bookName = (document.getElementById('book_name')?.value || '').trim();
+                const chapter = (document.getElementById('chapter')?.value || '').trim();
+                const count = document.getElementById('count')?.value || '10';
+                const schoolName = (document.getElementById('school_name')?.value || '').trim();
+                const teacherName = (document.getElementById('teacher_name')?.value || '').trim();
 
-            this.value = val;
-            this.setSelectionRange(pos, pos);
-        });
+                log('مقادیر فرم:', {
+                    grade,
+                    field,
+                    bookUrl,
+                    bookName,
+                    chapter,
+                    count
+                });
 
-        chapterInput.addEventListener('blur', function() {
-            this.value = this.value.replace(/,$/, '');
-        });
+                if (!grade) return showAlert('پایه تحصیلی را انتخاب کنید!', 'danger');
+                if (parseInt(grade, 10) >= 10 && !field) return showAlert('رشته تحصیلی را انتخاب کنید!',
+                    'danger');
+                if (!bookUrl) return showAlert('یک کتاب درسی انتخاب کنید!', 'danger');
 
-        function insertComma(input) {
-            const pos = input.selectionStart;
-            const val = input.value;
-            if (val[pos - 1] === ',' || val.length === 0) return;
-            input.value = val.slice(0, pos) + ',' + val.slice(pos);
-            input.setSelectionRange(pos + 1, pos + 1);
-        }
+                try {
+                    submitBtn.disabled = true;
+                    loading.style.display = 'flex';
+
+                    // ۱) خواندن کتاب
+                    loadingTxt.innerText = '📄 در حال خواندن متن کتاب...';
+                    log('fetch کتاب:', bookUrl);
+
+                    const response = await fetchWithTimeout(bookUrl, {}, 30000);
+                    log('وضعیت کتاب:', response.status);
+
+                    if (!response.ok) {
+                        throw new Error('فایل کتاب یافت نشد (' + response.status + ')\nآدرس: ' + bookUrl);
+                    }
+
+                    const extractedText = await response.text();
+                    log('طول متن:', extractedText.length);
+
+                    if (!extractedText || extractedText.trim().length < 50) {
+                        throw new Error('متن کتاب خالی یا ناقص است (کمتر از ۵۰ کاراکتر).');
+                    }
+
+                    // ۲) ارسال به بک‌اند لاراول (اگر route ساختی)
+                    // اگر هنوز route نساختی، بخش AI سمت کلاینت پایین را فعال بگذار
+                    loadingTxt.innerText = '⏳ هوش مصنوعی در حال تولید سوالات...';
+
+                    let questions = null;
+
+                    // ----- حالت A: بک‌اند لاراول -----
+                    const useBackend = true; // اگر route نداری false کن
+                    if (useBackend) {
+                        log('ارسال به /api/generate-questions ...');
+                        const aiRes = await fetchWithTimeout('/api/generate-questions', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                                    ?.content || ''
+                            },
+                            body: JSON.stringify({
+                                text: extractedText,
+                                bookName: bookName,
+                                grade: grade,
+                                field: field,
+                                chapter: chapter,
+                                count: parseInt(count, 10)
+                            })
+                        }, 100000);
+
+                        const aiData = await aiRes.json().catch(() => ({}));
+                        log('پاسخ سرور:', aiRes.status, aiData);
+
+                        if (!aiRes.ok) {
+                            throw new Error(
+                                (aiData.error || 'خطای سرور') +
+                                (aiData.detail ? '\n' + aiData.detail : '') +
+                                '\nکد: ' + aiRes.status
+                            );
+                        }
+                        if (!aiData.questions || !aiData.questions.length) {
+                            throw new Error(aiData.error || 'سوالی از سرور برنگشت.');
+                        }
+                        questions = aiData.questions;
+                    } else {
+                        // ----- حالت B: مستقیم از مرورگر (فقط تست) -----
+                        const API_KEY = window.AI_API_KEY || '';
+                        if (!API_KEY) {
+                            throw new Error(
+                                'کلید API تنظیم نشده.\n' +
+                                'یا useBackend را true کن و Controller لاراول بساز،\n' +
+                                'یا در کنسول بنویس: window.AI_API_KEY = "کلید"'
+                            );
+                        }
+                        // ... در صورت نیاز همان ai() قبلی
+                        throw new Error('حالت کلاینت غیرفعال است. از بک‌اند استفاده کن.');
+                    }
+
+                    log('تعداد سوالات:', questions.length);
+
+                    // ۳) localStorage
+                    const now = new Date().toISOString();
+                    const examId = 'exam_' + Date.now();
+
+                    const editorData = {
+                        id: examId,
+                        name: bookName || ('آزمون پایه ' + grade),
+                        data: questions,
+                        createdAt: now,
+                        updatedAt: now
+                    };
+                    const dataforpdf = {
+                        chapter: chapter,
+                        subject: bookName,
+                        grade: grade,
+                        schoolName: schoolName,
+                        teacherName: teacherName,
+                        field: field
+                    };
+
+                    localStorage.setItem('examDataForEditor', JSON.stringify(editorData));
+                    localStorage.setItem('dataforpdf', JSON.stringify(dataforpdf));
+                    log('localStorage ذخیره شد');
+
+                    showAlert('✅ ' + questions.length + ' سوال تولید شد! در حال انتقال به ویرایشگر...',
+                        'success');
+
+                    setTimeout(function() {
+                        window.location.href = 'main/editor';
+                    }, 800);
+
+                } catch (err) {
+                    logError(err);
+                    showAlert('❌ ' + (err.message || String(err)), 'danger');
+                } finally {
+                    submitBtn.disabled = false;
+                    loading.style.display = 'none';
+                    log('loading خاموش شد');
+                }
+            });
+
+            // ══ فیلتر فصل + shake ════════════════
+            const chapterInput = document.getElementById('chapter');
+            if (chapterInput) {
+                function toEnglishDigits(str) {
+                    const persian = [/۰/g, /۱/g, /۲/g, /۳/g, /۴/g, /۵/g, /۶/g, /۷/g, /۸/g, /۹/g];
+                    const arabic = [/٠/g, /١/g, /٢/g, /٣/g, /٤/g, /٥/g, /٦/g, /٧/g, /٨/g, /٩/g];
+                    for (let i = 0; i < 10; i++) {
+                        str = str.replace(persian[i], i).replace(arabic[i], i);
+                    }
+                    return str;
+                }
+
+                function shakeInput(input) {
+                    input.style.transition = 'transform 0.1s';
+                    input.style.transform = 'translateX(-3px)';
+                    setTimeout(function() {
+                        input.style.transform = 'translateX(3px)';
+                        setTimeout(function() {
+                            input.style.transform = 'translateX(0)';
+                        }, 100);
+                    }, 100);
+                }
+
+                chapterInput.addEventListener('keydown', function(e) {
+                    const allowed = ['Backspace', 'Delete', 'Tab', 'Enter', 'Escape', 'Home', 'End',
+                        'ArrowLeft', 'ArrowRight'
+                    ];
+                    if (allowed.includes(e.key) || e.ctrlKey || e.metaKey) return;
+                    if (!/[\d, \-\u06F0-\u06F9\u0660-\u0669]/.test(e.key)) e.preventDefault();
+                });
+
+                chapterInput.addEventListener('input', function() {
+                    let val = this.value;
+                    const oldValue = val;
+                    val = toEnglishDigits(val);
+                    const digits = val.replace(/\D/g, '');
+                    const uniqueDigits = [...new Set(digits.split(''))].sort(function(a, b) {
+                        return Number(a) - Number(b);
+                    });
+                    const formattedVal = uniqueDigits.join(',');
+                    this.value = formattedVal;
+                    this.setSelectionRange(formattedVal.length, formattedVal.length);
+                    if (oldValue.replace(/\D/g, '').length > uniqueDigits.length) {
+                        shakeInput(this);
+                    }
+                });
+
+                chapterInput.addEventListener('blur', function() {
+                    this.value = this.value.replace(/,$/, '');
+                });
+            }
+
+            log('اسکریپت سوال‌ساز لود شد ✓');
+        })();
     </script>
     <script>
         (function() {
@@ -1251,65 +1389,84 @@
                 }
             }
         })();
+        // ══ فیلتر و فرمت‌ساز خودکار ورودی فصل (نمونه: 1,2,3) ════════════════
         const chapterInput = document.getElementById('chapter');
 
-        // ── جلوگیری از ورود کاراکتر غیرمجاز با keydown ──
-        chapterInput.addEventListener('keydown', function(e) {
-            const allowed = [
-                'Backspace', 'Delete', 'Tab', 'Enter', 'Escape',
-                'Home', 'End', 'ArrowLeft', 'ArrowRight'
-            ];
+        // تبدیل اعداد فارسی/عربی به انگلیسی
+        function toEnglishDigits(str) {
+            const persianDigits = [/۰/g, /۱/g, /۲/g, /۳/g, /۴/g, /۵/g, /۶/g, /۷/g, /۸/g, /۹/g];
+            const arabicDigits = [/٠/g, /١/g, /٢/g, /٣/g, /٤/g, /٥/g, /٦/g, /٧/g, /٨/g, /٩/g];
+            for (let i = 0; i < 10; i++) {
+                str = str.replace(persianDigits[i], i).replace(arabicDigits[i], i);
+            }
+            return str;
+        }
 
+        chapterInput.addEventListener('keydown', function(e) {
+            const allowed = ['Backspace', 'Delete', 'Tab', 'Enter', 'Escape', 'Home', 'End', 'ArrowLeft',
+                'ArrowRight'
+            ];
             if (allowed.includes(e.key) || e.ctrlKey || e.metaKey) return;
 
-            // Space و خط‌تیره → تبدیل به کاما
-            if (e.key === ' ' || e.key === '-') {
+            // فقط اجازه فشردن اعداد (کیبورد فارسی/انگلیسی) و کاما/فاصله/خط تیره را می‌دهد
+            if (!/[\d, \-\u06F0-\u06F9\u0660-\u0669]/.test(e.key)) {
                 e.preventDefault();
-                insertComma(this);
-                return;
             }
-
-            // فقط عدد و کاما مجاز است
-            if (!/[\d,]/.test(e.key)) e.preventDefault();
         });
 
-        // ── پاک‌سازی هنگام paste یا input ──
         chapterInput.addEventListener('input', function() {
-            const pos = this.selectionStart;
             let val = this.value;
+            const oldValue = val;
 
-            val = val.replace(/[^\d,]/g, ','); // غیر از عدد و کاما → کاما
-            val = val.replace(/,{2,}/g, ','); // کاماهای تکراری → یکی
-            val = val.replace(/^,/, ''); // کاما ابتدایی → حذف
-            val = val.replace(/,$/, ''); // کاما انتهایی → حذف (موقع blur)
+            // ۱. تبدیل اعداد فارسی به انگلیسی
+            val = toEnglishDigits(val);
 
-            this.value = val;
-            // نگه‌داشتن موقعیت cursor
-            this.setSelectionRange(pos, pos);
+            // ۲. حذف هر چیزی به جز اعداد انگلیسی
+            const digits = val.replace(/\D/g, '');
+
+            // ۳. حذف اعداد تکراری با استفاده از Set
+            const uniqueDigits = [...new Set(digits.split(''))];
+
+            // ۴. مرتب‌سازی از کم به زیاد
+            uniqueDigits.sort((a, b) => Number(a) - Number(b));
+
+            // ۵. فرمت‌دهی به صورت کاما بین هر عدد (مثلاً 1,2,3)
+            const formattedVal = uniqueDigits.join(',');
+
+            this.value = formattedVal;
+
+            // ۶. نشانگر (Cursor) را به انتهای متن منتقل کن
+            // (چون بعد از مرتب‌سازی جایگاه اعداد تغییر می‌کند، منطقی‌ترین جا انتهاست)
+            this.setSelectionRange(formattedVal.length, formattedVal.length);
+
+            // ۷. اگر عدد تکراری زد، یک افکت تکان کوتاه بده (اختیاری)
+            if (oldValue.replace(/\D/g, '').length > uniqueDigits.length) {
+                shakeInput(this);
+            }
         });
 
-        // ── حذف کاما انتهایی هنگام خروج از فیلد ──
         chapterInput.addEventListener('blur', function() {
+            // حذف کامای احتمالی در آخرین کاراکتر هنگام خروج از اینپوت
             this.value = this.value.replace(/,$/, '');
         });
 
-        // ── تابع کمکی: درج کاما در موقعیت cursor ──
-        function insertComma(input) {
-            const pos = input.selectionStart;
-            const val = input.value;
-
-            // اگر قبل از cursor کاما بود، دوباره نگذار
-            if (val[pos - 1] === ',' || val.length === 0) return;
-
-            input.value = val.slice(0, pos) + ',' + val.slice(pos);
-            input.setSelectionRange(pos + 1, pos + 1);
+        // افکت تکان کوتاه هنگام تلاش برای ورود عدد تکراری (اختیاری)
+        function shakeInput(input) {
+            input.style.transition = 'transform 0.1s';
+            input.style.transform = 'translateX(-3px)';
+            setTimeout(() => {
+                input.style.transform = 'translateX(3px)';
+                setTimeout(() => {
+                    input.style.transform = 'translateX(0)';
+                }, 100);
+            }, 100);
         }
     </script>
     <script>
         /* ═══════════════════════════════════════════════════════════════
-       BOOKS DATABASE — همگام با BOOKS پایتون
-       مسیر لوکال: asset/ketabhaye_darsi_txt_1404-1405/...
-    ═══════════════════════════════════════════════════════════════ */
+                                                           BOOKS DATABASE — همگام با BOOKS پایتون
+                                                           مسیر لوکال: asset/ketabhaye_darsi_txt_1404-1405/...
+                                                        ═══════════════════════════════════════════════════════════════ */
 
         // تابع کمکی برای ساخت URL لوکال
         const localPath = (folder, filename) =>
@@ -2969,21 +3126,13 @@
                 category: "🔧 فنی و حرفه‌ای",
                 badge: "b-fanni",
                 badgeText: "فنی",
-                items: ["شبکه و نرم‌افزار رایانه", "الکترونیک", "الکتروتکنیک",
-                    "مکاترونیک", "رباتیک", "مکانیک خودرو", "جوشکاری",
-                    "نقشه‌کشی معماری", "تأسیسات حرارتی", "صنایع غذایی",
-                    "صنایع شیمیایی", "گرافیک رایانه‌ای", "کشاورزی (تولید گیاهی)",
-                    "دامپروری (تولید دامی)", "آبخیزداری", "شیلات و آبزی‌پروری"
-                ]
+                items: ["فنی و حرفه‌ای"]
             },
             {
                 category: "🛠️ کار و دانش",
                 badge: "b-kar",
                 badgeText: "کاردانش",
-                items: ["خدمات رایانه‌ای", "حسابداری رایانه‌ای", "بهداشت محیط",
-                    "بهیاری", "فن‌آوری اطلاعات (IT)", "طراحی دوخت",
-                    "صنایع دستی", "آرایشگری", "تهیه و پخت غذا", "عکاسی"
-                ]
+                items: ["کار و دانش"]
             },
         ];
 
@@ -3285,13 +3434,6 @@
             // اینجا fetch خود را جایگزین کنید:
             // fetch("/api/generate", { method:"POST", body: JSON.stringify(payload) ... })
 
-            setTimeout(() => {
-                document.getElementById("submitBtn").style.display = "";
-                document.getElementById("loading").style.display = "none";
-                alert(
-                    `✅ سوالات کتاب "${payload.book_name}" با موفقیت تولید شد!\nلینک PDF: ${payload.book_url}`
-                );
-            }, 2500);
         });
     </script>
 </body>
