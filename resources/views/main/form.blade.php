@@ -949,7 +949,7 @@
                     </div>
                 </div>
                 <div class="header-actions"><button class="btn btn-icon" id="darkModeToggle" title="تغییر تم"> <i
-                            class="fas fa-moon"></i> </button> <a href="/editor" class="btn btn-secondary"> <i
+                            class="fas fa-moon"></i> </button> <a href="main/editor" class="btn btn-secondary"> <i
                             class="fas fa-edit"></i> ویرایشگر </a>
                 </div>
             </div>
@@ -1091,8 +1091,6 @@
     <script src="{{ asset('asset/js/dark-mode.js') }}"></script>
     <script src="{{ asset('asset/js/extaract-txt.js') }}"></script>
     <script>
-        // Form Submit Handler
-
         document.getElementById('questionForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
@@ -1103,7 +1101,7 @@
             // ── مقادیر فرم ──
             const grade = document.getElementById('grade').value.trim();
             const field = document.getElementById('field_of_study').value.trim();
-            const bookUrl = document.getElementById('book_url').value.trim();
+            const bookUrl = document.getElementById('book_url').value.trim(); // ← مسیر txt local
             const bookName = document.getElementById('book_name').value.trim();
             const chapter = document.getElementById('chapter').value.trim();
             const count = document.getElementById('count').value;
@@ -1119,35 +1117,34 @@
                 submitBtn.disabled = true;
                 loading.style.display = 'flex';
 
-                // ── مرحله ۱: دریافت PDF از chap.sch.ir و تبدیل به Blob ──
-                loadingTxt.innerText = '📥 در حال دریافت کتاب از chap.sch.ir...';
-                const response = await fetch(`/proxy-pdf?url=${encodeURIComponent(bookUrl)}`);
-                if (!response.ok) throw new Error(`خطا در دریافت فایل: ${response.status}`);
-                const pdfBlob = await response.blob(); // Blob هم .arrayBuffer() دارد ✅
+                // ── مرحله ۱: خواندن مستقیم فایل txt ──
+                loadingTxt.innerText = '📄 در حال خواندن متن کتاب...';
+                const response = await fetch(bookUrl);
+                if (!response.ok) throw new Error(`فایل کتاب یافت نشد (${response.status})`);
 
-                // ── مرحله ۲: استخراج متن با تابع موجود ──
-                loadingTxt.innerText = '📄 در حال استخراج متن PDF...';
-                const extractedText = await extractTextFromPDF(pdfBlob);
+                const extractedText = await response.text();
 
                 if (!extractedText || extractedText.trim().length < 50)
-                    throw new Error('متن کافی از PDF استخراج نشد (احتمالاً فایل اسکن‌شده است).');
-                console.log(" PDF :" + extractedText)
-                // ── مرحله ۳: ساخت پرامپت ──
+                    throw new Error('متن کتاب خالی یا ناقص است.');
+
+                console.log('📖 طول متن:', extractedText.length, 'کاراکتر');
+
+                // ── مرحله ۲: ساخت پرامپت ──
                 loadingTxt.innerText = '🧠 در حال ساخت پرامپت...';
                 const prompt = buildPrompt(extractedText, bookName, grade, field, chapter, count);
 
-                // ── مرحله ۴: ارسال به AI با تابع موجود ──
+                // ── مرحله ۳: ارسال به AI ──
                 loadingTxt.innerText = '⏳ هوش مصنوعی در حال تولید سوالات...';
                 const aiResponse = await ai(prompt);
 
-                // ── مرحله ۵: پارس JSON پاسخ ──
+                // ── مرحله ۴: پارس JSON ──
                 const parsed = parseAIResponse(aiResponse);
                 if (!parsed?.questions) {
                     console.warn('پاسخ خام AI:', aiResponse);
                     throw new Error('پاسخ AI در فرمت JSON مورد انتظار نبود.');
                 }
 
-                // ── مرحله ۶: ذخیره در localStorage ──
+                // ── مرحله ۵: ذخیره در localStorage ──
                 const finalOutput = {
                     meta: {
                         bookName,
@@ -1157,13 +1154,13 @@
                         schoolName,
                         teacherName,
                         generatedAt: new Date().toISOString(),
-                        sourceUrl: bookUrl
+                        sourceFile: bookUrl,
                     },
                     questions: parsed.questions
                 };
                 localStorage.setItem('ai_quiz_output', JSON.stringify(finalOutput, null, 2));
 
-                // ── مرحله ۷: نمایش سوالات ──
+                // ── مرحله ۶: نمایش سوالات ──
                 displayQuestions(parsed.questions, schoolName, teacherName, finalOutput.meta);
                 showAlert(`✅ ${parsed.questions.length} سوال تولید شد!`, 'success');
 
@@ -1174,26 +1171,53 @@
                 submitBtn.disabled = false;
                 loading.style.display = 'none';
 
-                // این خط خطا می‌داد، حذفش کن یا اینطوری بنویس:
                 const alertEl = document.getElementById('alertContainer');
-                if (alertEl) alertEl.style.display = ''; // ← safe
+                if (alertEl) alertEl.style.display = '';
             }
         });
-        const amountInput = document.getElementById("chapter");
-        amountInput.addEventListener("input", function(e) {
-            let value = this.value.replace(/[^0-9]/g, "");
-            if (value.length > 1) {
-                value = value.replace(/\B(?=(\d{1})+(?!\d))/g, ",");
+
+
+        // ══ فیلتر ورودی فصل — عدد + کاما ══════════════════════════
+        const chapterInput = document.getElementById('chapter');
+
+        chapterInput.addEventListener('keydown', function(e) {
+            const allowed = ['Backspace', 'Delete', 'Tab', 'Enter', 'Escape', 'Home', 'End', 'ArrowLeft',
+                'ArrowRight'
+            ];
+            if (allowed.includes(e.key) || e.ctrlKey || e.metaKey) return;
+
+            if (e.key === ' ' || e.key === '-') {
+                e.preventDefault();
+                insertComma(this);
+                return;
             }
 
-            this.value = value;
+            if (!/[\d,]/.test(e.key)) e.preventDefault();
         });
-        amountInput.addEventListener("paste", function(e) {
-            const pastedData = e.clipboardData.getData("text");
-            if (!/^\d+$/.test(pastedData)) {
-                e.preventDefault();
-            }
+
+        chapterInput.addEventListener('input', function() {
+            const pos = this.selectionStart;
+            let val = this.value;
+
+            val = val.replace(/[^\d,]/g, ',');
+            val = val.replace(/,{2,}/g, ',');
+            val = val.replace(/^,/, '');
+
+            this.value = val;
+            this.setSelectionRange(pos, pos);
         });
+
+        chapterInput.addEventListener('blur', function() {
+            this.value = this.value.replace(/,$/, '');
+        });
+
+        function insertComma(input) {
+            const pos = input.selectionStart;
+            const val = input.value;
+            if (val[pos - 1] === ',' || val.length === 0) return;
+            input.value = val.slice(0, pos) + ',' + val.slice(pos);
+            input.setSelectionRange(pos + 1, pos + 1);
+        }
     </script>
     <script>
         (function() {
@@ -1282,535 +1306,1648 @@
         }
     </script>
     <script>
+        /* ═══════════════════════════════════════════════════════════════
+       BOOKS DATABASE — همگام با BOOKS پایتون
+       مسیر لوکال: asset/ketabhaye_darsi_txt_1404-1405/...
+    ═══════════════════════════════════════════════════════════════ */
+
+        // تابع کمکی برای ساخت URL لوکال
+        const localPath = (folder, filename) =>
+            `{{ asset('asset/ketabhaye_darsi_txt_1404-1405/${folder}/${filename}.txt') }}`;
+
         const BOOKS_DB = {
 
             /* ═══════════════════════════════════════════
-               پایه اول ابتدایی  (کد پایه: 8)
+               پایه اول ابتدایی
                ═══════════════════════════════════════════ */
             g1: [{
                     name: "آموزش قرآن (اول)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/8/C101.pdf"
+                    url: localPath("ebtedaei/paye_1_avval", "amoozesh_quran_avval")
                 },
                 {
                     name: "فارسی (اول)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/8/C103.pdf"
+                    url: localPath("ebtedaei/paye_1_avval", "farsi_avval")
                 },
                 {
-                    name: "نگرش فارسی (اول)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/8/C104.pdf"
+                    name: "نگارش فارسی (اول)",
+                    url: localPath("ebtedaei/paye_1_avval", "negaresh_farsi_avval")
                 },
                 {
                     name: "ریاضی (اول)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/8/C105.pdf"
+                    url: localPath("ebtedaei/paye_1_avval", "riazi_avval")
                 },
                 {
-                    name: "فارسی می نویسم (اول)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/8/C138.pdf"
+                    name: "فارسی می‌نویسم (اول)",
+                    url: localPath("ebtedaei/paye_1_avval", "farsi_minevisam_avval")
                 },
                 {
-                    name: "فارسی می خوانم (اول)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/8/C137.pdf"
+                    name: "فارسی می‌خوانم (اول)",
+                    url: localPath("ebtedaei/paye_1_avval", "farsi_mikhoonam_avval")
                 },
                 {
                     name: "علوم تجربی (اول)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/8/C106.pdf"
+                    url: localPath("ebtedaei/paye_1_avval", "oloom_avval")
                 },
                 {
                     name: "حرکت و بازی (اول)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/8/C144.pdf"
+                    url: localPath("ebtedaei/paye_1_avval", "harekat_bazi_avval")
                 },
                 {
                     name: "حجاب پیرامون (اول)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/8/C143.pdf"
+                    url: localPath("ebtedaei/paye_1_avval", "hejab_piramon_avval")
                 },
                 {
-                    name: "ریاضی دوست داشتنی (اول)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/8/C139.pdf"
+                    name: "ریاضی دوست‌داشتنی (اول)",
+                    url: localPath("ebtedaei/paye_1_avval", "riazi_doostdashtani_avval")
                 },
             ],
 
             /* ═══════════════════════════════════════════
-               پایه دوم ابتدایی  (کد پایه: 9)
+               پایه دوم ابتدایی
                ═══════════════════════════════════════════ */
             g2: [{
                     name: "نگارش فارسی (دوم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/9/C2024.pdf"
+                    url: localPath("ebtedaei/paye_2_dovvom", "negaresh_farsi_dovvom")
                 },
                 {
                     name: "فارسی (دوم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/9/C2023.pdf"
+                    url: localPath("ebtedaei/paye_2_dovvom", "farsi_dovvom")
                 },
                 {
-                    name: "هدیه آسمان (دوم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/9/C2022.pdf"
+                    name: "هدیه‌های آسمان (دوم)",
+                    url: localPath("ebtedaei/paye_2_dovvom", "hadiye_aseman_dovvom")
                 },
                 {
                     name: "آموزش قرآن (دوم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/9/C201.pdf"
+                    url: localPath("ebtedaei/paye_2_dovvom", "amoozesh_quran_dovvom")
                 },
                 {
                     name: "علوم تجربی (دوم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/9/C206.pdf"
+                    url: localPath("ebtedaei/paye_2_dovvom", "oloom_dovvom")
                 },
                 {
                     name: "ریاضی (دوم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/9/C205.pdf"
+                    url: localPath("ebtedaei/paye_2_dovvom", "riazi_dovvom")
                 },
                 {
-                    name: "صمیمه کتاب هدیه های آسمان (دوم) — ۱",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/9/C220.pdf"
+                    name: "ضمیمه هدیه‌های آسمان (دوم) — ۱",
+                    url: localPath("ebtedaei/paye_2_dovvom", "zamime_hadiye_aseman_dovvom_1")
                 },
                 {
-                    name: "صمیمه کتاب هدیه های آسمان (دوم) — ۲",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/9/C219.pdf"
+                    name: "ضمیمه هدیه‌های آسمان (دوم) — ۲",
+                    url: localPath("ebtedaei/paye_2_dovvom", "zamime_hadiye_aseman_dovvom_2")
                 },
             ],
 
             /* ═══════════════════════════════════════════
-               پایه سوم ابتدایی  (کد پایه: 10)
+               پایه سوم ابتدایی
                ═══════════════════════════════════════════ */
             g3: [{
                     name: "نگارش فارسی (سوم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/10/C304.pdf"
+                    url: localPath("ebtedaei/paye_3_sevvom", "negaresh_farsi_sevvom")
                 },
                 {
                     name: "فارسی (سوم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/10/C303.pdf"
+                    url: localPath("ebtedaei/paye_3_sevvom", "farsi_sevvom")
                 },
                 {
-                    name: "هدیه های آسمان (سوم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/10/C302.pdf"
+                    name: "هدیه‌های آسمان (سوم)",
+                    url: localPath("ebtedaei/paye_3_sevvom", "hadiye_aseman_sevvom")
                 },
                 {
                     name: "آموزش قرآن (سوم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/10/C301.pdf"
+                    url: localPath("ebtedaei/paye_3_sevvom", "amoozesh_quran_sevvom")
                 },
                 {
                     name: "مطالعات اجتماعی (سوم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/10/C307.pdf"
+                    url: localPath("ebtedaei/paye_3_sevvom", "motaleaat_sevvom")
                 },
                 {
                     name: "علوم تجربی (سوم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/10/C306.pdf"
+                    url: localPath("ebtedaei/paye_3_sevvom", "oloom_sevvom")
                 },
                 {
                     name: "ریاضی (سوم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/10/C305.pdf"
+                    url: localPath("ebtedaei/paye_3_sevvom", "riazi_sevvom")
                 },
                 {
-                    name: "هدیه های آسمان (سوم) — ضمیمه",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/10/C320.pdf"
+                    name: "ضمیمه هدیه‌های آسمان (سوم)",
+                    url: localPath("ebtedaei/paye_3_sevvom", "zamime_hadiye_aseman_sevvom")
                 },
             ],
 
             /* ═══════════════════════════════════════════
-               پایه چهارم ابتدایی (کد پایه: 12)
+               پایه چهارم ابتدایی
                ═══════════════════════════════════════════ */
             g4: [{
                     name: "فارسی (چهارم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/12/C403.pdf"
+                    url: localPath("ebtedaei/paye_4_chaharom", "farsi_chaharom")
                 },
                 {
-                    name: "هدیه های آسمان (چهارم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/12/C402.pdf"
+                    name: "هدیه‌های آسمان (چهارم)",
+                    url: localPath("ebtedaei/paye_4_chaharom", "hadiye_aseman_chaharom")
                 },
                 {
                     name: "آموزش قرآن (چهارم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/12/C401.pdf"
+                    url: localPath("ebtedaei/paye_4_chaharom", "amoozesh_quran_chaharom")
                 },
                 {
                     name: "از ایرانمان دفاع می‌کنیم (چهارم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/12/C365.pdf"
+                    url: localPath("ebtedaei/paye_4_chaharom", "az_iranman_defa_chaharom")
                 },
                 {
                     name: "مطالعات اجتماعی (چهارم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/12/C407.pdf"
+                    url: localPath("ebtedaei/paye_4_chaharom", "motaleaat_chaharom")
                 },
                 {
                     name: "علوم تجربی (چهارم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/12/C406.pdf"
+                    url: localPath("ebtedaei/paye_4_chaharom", "oloom_chaharom")
                 },
                 {
                     name: "ریاضی (چهارم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/12/C405.pdf"
+                    url: localPath("ebtedaei/paye_4_chaharom", "riazi_chaharom")
                 },
                 {
                     name: "نگارش فارسی (چهارم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/12/C404.pdf"
+                    url: localPath("ebtedaei/paye_4_chaharom", "negaresh_farsi_chaharom")
                 },
                 {
-                    name: "ضمیمه کتاب هدیه های آسمان (چهارم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/12/C419.pdf"
+                    name: "ضمیمه هدیه‌های آسمان (چهارم)",
+                    url: localPath("ebtedaei/paye_4_chaharom", "zamime_hadiye_chaharom")
                 },
                 {
                     name: "کتاب کار آموزش خط (چهارم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/12/C408.pdf"
+                    url: localPath("ebtedaei/paye_4_chaharom", "ketabkar_khat_chaharom")
                 },
             ],
 
             /* ═══════════════════════════════════════════
-               پایه پنجم ابتدایی (کد پایه: 13)
+               پایه پنجم ابتدایی
                ═══════════════════════════════════════════ */
             g5: [{
                     name: "فارسی (پنجم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/13/C503.pdf"
+                    url: localPath("ebtedaei/paye_5_panjom", "farsi_panjom")
                 },
                 {
-                    name: "هدیه های آسمان (پنجم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/13/C502.pdf"
+                    name: "هدیه‌های آسمان (پنجم)",
+                    url: localPath("ebtedaei/paye_5_panjom", "hadiye_aseman_panjom")
                 },
                 {
                     name: "آموزش قرآن (پنجم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/13/C501.pdf"
+                    url: localPath("ebtedaei/paye_5_panjom", "amoozesh_quran_panjom")
                 },
                 {
                     name: "از ایرانمان دفاع می‌کنیم (پنجم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/13/C365.pdf"
+                    url: localPath("ebtedaei/paye_5_panjom", "az_iranman_defa_panjom")
                 },
                 {
                     name: "علوم تجربی (پنجم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/13/C506.pdf"
+                    url: localPath("ebtedaei/paye_5_panjom", "oloom_panjom")
                 },
                 {
                     name: "ریاضی (پنجم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/13/C505.pdf"
+                    url: localPath("ebtedaei/paye_5_panjom", "riazi_panjom")
                 },
                 {
                     name: "نگارش فارسی (پنجم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/13/C504.pdf"
+                    url: localPath("ebtedaei/paye_5_panjom", "negaresh_farsi_panjom")
                 },
                 {
                     name: "مطالعات اجتماعی (پنجم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/13/C507.pdf"
+                    url: localPath("ebtedaei/paye_5_panjom", "motaleaat_panjom")
                 },
                 {
-                    name: "ضمیمه کتاب هدیه های آسمان (پنجم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/13/C519.pdf"
+                    name: "ضمیمه هدیه‌های آسمان (پنجم)",
+                    url: localPath("ebtedaei/paye_5_panjom", "zamime_hadiye_panjom")
                 },
                 {
                     name: "کتاب کار آموزش خط (پنجم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/13/C508.pdf"
+                    url: localPath("ebtedaei/paye_5_panjom", "ketabkar_khat_panjom")
                 },
             ],
 
             /* ═══════════════════════════════════════════
-               پایه ششم ابتدایی (کد پایه: 32)
+               پایه ششم ابتدایی
                ═══════════════════════════════════════════ */
             g6: [{
                     name: "فارسی (ششم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/32/C603.pdf"
+                    url: localPath("ebtedaei/paye_6_sheshom", "farsi_sheshom")
                 },
-                // توجه: در تصویر، "هدیه آسمان (ششم)" با کد ۶۰۴ آمده ولی "نگارش" هم با ۶۰۴ است. من مطابق الگوی پایه‌های قبل، کد ۶۰۲ را برای "هدیه آسمان" می‌گذارم تا تداخل نداشته باشد.
                 {
-                    name: "هدیه آسمان (ششم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/32/C602.pdf"
+                    name: "هدیه‌های آسمان (ششم)",
+                    url: localPath("ebtedaei/paye_6_sheshom", "hadiye_aseman_sheshom")
                 },
                 {
                     name: "آموزش قرآن (ششم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/32/C601.pdf"
+                    url: localPath("ebtedaei/paye_6_sheshom", "amoozesh_quran_sheshom")
                 },
                 {
                     name: "از ایرانمان دفاع می‌کنیم (ششم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/32/C365.pdf"
+                    url: localPath("ebtedaei/paye_6_sheshom", "az_iranman_defa_sheshom")
                 },
                 {
                     name: "مطالعات اجتماعی (ششم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/32/C607.pdf"
+                    url: localPath("ebtedaei/paye_6_sheshom", "motaleaat_sheshom")
                 },
                 {
                     name: "علوم تجربی (ششم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/32/C606.pdf"
+                    url: localPath("ebtedaei/paye_6_sheshom", "oloom_sheshom")
                 },
                 {
                     name: "ریاضی (ششم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/32/C605.pdf"
+                    url: localPath("ebtedaei/paye_6_sheshom", "riazi_sheshom")
                 },
                 {
                     name: "نگارش فارسی (ششم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/32/C604.pdf"
+                    url: localPath("ebtedaei/paye_6_sheshom", "negaresh_farsi_sheshom")
                 },
                 {
-                    name: "ضمیمه پیام های آسمان (ششم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/32/C619.pdf"
+                    name: "ضمیمه پیام‌های آسمان (ششم)",
+                    url: localPath("ebtedaei/paye_6_sheshom", "zamime_payam_aseman_sheshom")
                 },
                 {
                     name: "کار و فناوری (ششم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/32/C617.pdf"
+                    url: localPath("ebtedaei/paye_6_sheshom", "kar_fanavari_sheshom")
                 },
                 {
                     name: "تفکر و پژوهش (ششم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/32/C612.pdf"
+                    url: localPath("ebtedaei/paye_6_sheshom", "tafakkor_pajoohesh_sheshom")
                 },
                 {
                     name: "کتاب کار آموزش خط (ششم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/32/C608.pdf"
+                    url: localPath("ebtedaei/paye_6_sheshom", "ketabkar_khat_sheshom")
                 },
                 {
-                    name: "هدیه های آسمان (ششم) — ضمیمه",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/32/C620.pdf"
+                    name: "ضمیمه هدیه‌های آسمان (ششم)",
+                    url: localPath("ebtedaei/paye_6_sheshom", "zamime_hadiye_sheshom")
                 },
             ],
 
             /* ═══════════════════════════════════════════
-               پایه هفتم (متوسطه اول) — کد پایه: 555
+               پایه هفتم (متوسطه اول)
                ═══════════════════════════════════════════ */
             g7: [{
                     name: "آموزش قرآن (هفتم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C701.pdf"
+                    url: localPath("motavassete_avval/paye_7_haftom", "amoozesh_quran_haftom")
                 },
                 {
-                    name: "پیام های آسمان (هفتم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C702.pdf"
+                    name: "پیام‌های آسمان (هفتم)",
+                    url: localPath("motavassete_avval/paye_7_haftom", "payam_aseman_haftom")
                 },
                 {
                     name: "فارسی (هفتم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C703.pdf"
+                    url: localPath("motavassete_avval/paye_7_haftom", "farsi_haftom")
                 },
                 {
                     name: "فرهنگ و هنر (هفتم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C708.pdf"
+                    url: localPath("motavassete_avval/paye_7_haftom", "farhang_honar_haftom")
                 },
                 {
                     name: "مطالعات اجتماعی (هفتم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C707.pdf"
+                    url: localPath("motavassete_avval/paye_7_haftom", "motaleaat_haftom")
                 },
                 {
                     name: "علوم تجربی (هفتم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C706.pdf"
+                    url: localPath("motavassete_avval/paye_7_haftom", "oloom_haftom")
                 },
                 {
                     name: "ریاضی (هفتم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C705.pdf"
+                    url: localPath("motavassete_avval/paye_7_haftom", "riazi_haftom")
                 },
                 {
                     name: "تفکر و سبک زندگی (دختران) — هفتم",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C712.pdf"
+                    url: localPath("motavassete_avval/paye_7_haftom", "tafakkor_dokhtaran_haftom")
                 },
                 {
                     name: "انگلیسی (هفتم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C710.pdf"
+                    url: localPath("motavassete_avval/paye_7_haftom", "englisi_haftom")
                 },
                 {
                     name: "کار و فناوری (هفتم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C717.pdf"
+                    url: localPath("motavassete_avval/paye_7_haftom", "kar_fanavari_haftom")
                 },
                 {
                     name: "عربی (هفتم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C709.pdf"
+                    url: localPath("motavassete_avval/paye_7_haftom", "arabi_haftom")
                 },
                 {
                     name: "تفکر و سبک زندگی (پسران) — هفتم",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C713.pdf"
+                    url: localPath("motavassete_avval/paye_7_haftom", "tafakkor_pesaran_haftom")
                 },
                 {
-                    name: "ضمیمه پیام های آسمان (هفتم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C719.pdf"
-                },
-                // کتاب‌های ویژهٔ مدارس (از تصاویر پایه هفتم)
-                {
-                    name: "علوم تجربی (محتوای ویژه)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C724.pdf"
+                    name: "ضمیمه پیام‌های آسمان (هفتم)",
+                    url: localPath("motavassete_avval/paye_7_haftom", "zamime_payam_haftom")
                 },
                 {
-                    name: "ریاضیات (محتوای ویژه)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C723.pdf"
+                    name: "علوم تجربی (ویژه) — هفتم",
+                    url: localPath("motavassete_avval/paye_7_haftom", "oloom_vizhe_haftom")
                 },
                 {
-                    name: "فارسی و نگارش (ویژه مدارس)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C722.pdf"
+                    name: "ریاضی (ویژه) — هفتم",
+                    url: localPath("motavassete_avval/paye_7_haftom", "riazi_vizhe_haftom")
                 },
                 {
-                    name: "تعلیمات ادیان الهی (ویژه)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C720.pdf"
+                    name: "فارسی (ویژه) — هفتم",
+                    url: localPath("motavassete_avval/paye_7_haftom", "farsi_vizhe_haftom")
                 },
                 {
-                    name: "از ایرانمان دفاع می‌کنیم (ویژه)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C765.pdf"
+                    name: "تعلیمات ادیان الهی (ویژه) — هفتم",
+                    url: localPath("motavassete_avval/paye_7_haftom", "adyan_vizhe_haftom")
                 },
                 {
-                    name: "صمیمه از من تا خدا (هفتم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C742.pdf"
+                    name: "از ایرانمان دفاع می‌کنیم (هفتم)",
+                    url: localPath("motavassete_avval/paye_7_haftom", "az_iranman_defa_haftom")
                 },
                 {
-                    name: "تربیت دینی (از من تا خدا) — هفتم",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C741.pdf"
+                    name: "ضمیمه از من تا خدا (هفتم)",
+                    url: localPath("motavassete_avval/paye_7_haftom", "zamime_az_man_ta_khoda")
+                },
+                {
+                    name: "تربیت دینی (هفتم)",
+                    url: localPath("motavassete_avval/paye_7_haftom", "tarbiat_dini_haftom")
                 },
             ],
 
             /* ═══════════════════════════════════════════
-               پایه هشتم (متوسطه اول) — کد پایه: 555
+               پایه هشتم (متوسطه اول)
                ═══════════════════════════════════════════ */
             g8: [{
                     name: "از ایرانمان دفاع می‌کنیم (هشتم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C765.pdf"
+                    url: localPath("motavassete_avval/paye_8_hashtom", "az_iranman_defa_hashtom")
                 },
                 {
                     name: "آموزش قرآن (هشتم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C801.pdf"
+                    url: localPath("motavassete_avval/paye_8_hashtom", "amoozesh_quran_hashtom")
                 },
                 {
-                    name: "پیام های آسمان (هشتم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C802.pdf"
+                    name: "پیام‌های آسمان (هشتم)",
+                    url: localPath("motavassete_avval/paye_8_hashtom", "payam_aseman_hashtom")
                 },
                 {
                     name: "فارسی (هشتم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C803.pdf"
+                    url: localPath("motavassete_avval/paye_8_hashtom", "farsi_hashtom")
                 },
                 {
                     name: "مطالعات اجتماعی (هشتم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C807.pdf"
+                    url: localPath("motavassete_avval/paye_8_hashtom", "motaleaat_hashtom")
                 },
                 {
                     name: "علوم تجربی (هشتم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C806.pdf"
+                    url: localPath("motavassete_avval/paye_8_hashtom", "oloom_hashtom")
                 },
                 {
                     name: "ریاضی (هشتم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C805.pdf"
+                    url: localPath("motavassete_avval/paye_8_hashtom", "riazi_hashtom")
                 },
                 {
                     name: "نگارش (هشتم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C804.pdf"
+                    url: localPath("motavassete_avval/paye_8_hashtom", "negaresh_hashtom")
                 },
                 {
                     name: "کتاب کار انگلیسی (هشتم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C811.pdf"
+                    url: localPath("motavassete_avval/paye_8_hashtom", "ketabkar_englisi_hashtom")
                 },
                 {
                     name: "انگلیسی (هشتم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C810.pdf"
+                    url: localPath("motavassete_avval/paye_8_hashtom", "englisi_hashtom")
                 },
                 {
                     name: "عربی (هشتم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C809.pdf"
+                    url: localPath("motavassete_avval/paye_8_hashtom", "arabi_hashtom")
                 },
                 {
                     name: "فرهنگ و هنر (هشتم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C808.pdf"
+                    url: localPath("motavassete_avval/paye_8_hashtom", "farhang_honar_hashtom")
                 },
                 {
                     name: "کار و فناوری (هشتم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C817.pdf"
+                    url: localPath("motavassete_avval/paye_8_hashtom", "kar_fanavari_hashtom")
                 },
                 {
                     name: "تفکر و سبک زندگی (دختران) — هشتم",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C812.pdf"
+                    url: localPath("motavassete_avval/paye_8_hashtom", "tafakkor_dokhtaran_hashtom")
                 },
                 {
                     name: "تفکر و سبک زندگی (پسران) — هشتم",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C814.pdf"
+                    url: localPath("motavassete_avval/paye_8_hashtom", "tafakkor_pesaran_hashtom")
                 },
-                // کتاب‌های ویژه (از تصویر هشتم)
                 {
-                    name: "فارسی و نگارش (ویژه مدارس) — هشتم",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C823.pdf"
+                    name: "فارسی (ویژه) — هشتم",
+                    url: localPath("motavassete_avval/paye_8_hashtom", "farsi_vizhe_hashtom")
                 },
                 {
                     name: "تعلیمات ادیان الهی (ویژه) — هشتم",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C820.pdf"
+                    url: localPath("motavassete_avval/paye_8_hashtom", "adyan_vizhe_hashtom")
                 },
                 {
-                    name: "صمیمه پیام های آسمان (هشتم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C819.pdf"
+                    name: "ضمیمه پیام‌های آسمان (هشتم)",
+                    url: localPath("motavassete_avval/paye_8_hashtom", "zamime_payam_hashtom")
                 },
                 {
-                    name: "تربیت دینی صمیمه (هشتم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C842.pdf"
+                    name: "تربیت دینی (ضمیمه) — هشتم",
+                    url: localPath("motavassete_avval/paye_8_hashtom", "tarbiat_dini_zamime_hashtom")
                 },
                 {
-                    name: "از من تا خدا (تربیت) — هشتم",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C841.pdf"
+                    name: "از من تا خدا (هشتم)",
+                    url: localPath("motavassete_avval/paye_8_hashtom", "az_man_ta_khoda_hashtom")
                 },
                 {
-                    name: "علوم تجربی (محتوای ویژه) — هشتم",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C824.pdf"
+                    name: "علوم تجربی (ویژه) — هشتم",
+                    url: localPath("motavassete_avval/paye_8_hashtom", "oloom_vizhe_hashtom")
                 },
             ],
 
             /* ═══════════════════════════════════════════
-               پایه نهم (متوسطه اول) — کد پایه: 555
+               پایه نهم (متوسطه اول)
                ═══════════════════════════════════════════ */
             g9: [{
                     name: "از ایرانمان دفاع می‌کنیم (نهم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C765.pdf"
+                    url: localPath("motavassete_avval/paye_9_nohom", "az_iranman_defa_nohom")
                 },
                 {
                     name: "آموزش قرآن (نهم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C901.pdf"
+                    url: localPath("motavassete_avval/paye_9_nohom", "amoozesh_quran_nohom")
                 },
                 {
-                    name: "پیام های آسمان (نهم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C902.pdf"
+                    name: "پیام‌های آسمان (نهم)",
+                    url: localPath("motavassete_avval/paye_9_nohom", "payam_aseman_nohom")
                 },
                 {
                     name: "فارسی (نهم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C903.pdf"
+                    url: localPath("motavassete_avval/paye_9_nohom", "farsi_nohom")
                 },
                 {
                     name: "مطالعات اجتماعی (نهم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C907.pdf"
+                    url: localPath("motavassete_avval/paye_9_nohom", "motaleaat_nohom")
                 },
                 {
                     name: "علوم تجربی (نهم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C906.pdf"
+                    url: localPath("motavassete_avval/paye_9_nohom", "oloom_nohom")
                 },
                 {
                     name: "ریاضی (نهم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C905.pdf"
+                    url: localPath("motavassete_avval/paye_9_nohom", "riazi_nohom")
                 },
                 {
                     name: "نگارش (نهم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C904.pdf"
+                    url: localPath("motavassete_avval/paye_9_nohom", "negaresh_nohom")
                 },
                 {
                     name: "کتاب کار انگلیسی (نهم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C911.pdf"
+                    url: localPath("motavassete_avval/paye_9_nohom", "ketabkar_englisi_nohom")
                 },
                 {
                     name: "انگلیسی (نهم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C910.pdf"
+                    url: localPath("motavassete_avval/paye_9_nohom", "englisi_nohom")
                 },
                 {
                     name: "عربی (نهم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C909.pdf"
+                    url: localPath("motavassete_avval/paye_9_nohom", "arabi_nohom")
                 },
                 {
                     name: "فرهنگ و هنر (نهم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C908.pdf"
+                    url: localPath("motavassete_avval/paye_9_nohom", "farhang_honar_nohom")
                 },
                 {
                     name: "آمادگی دفاعی (نهم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C915.pdf"
+                    url: localPath("motavassete_avval/paye_9_nohom", "amadegi_defaei_nohom")
                 },
                 {
                     name: "کار و فناوری (نهم)",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C917.pdf"
-                },
-                // کتاب‌های ویژه (از تصویر نهم)
-                {
-                    name: "علوم تجربی (ویژه مدارس) — نهم",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C924.pdf"
+                    url: localPath("motavassete_avval/paye_9_nohom", "kar_fanavari_nohom")
                 },
                 {
-                    name: "ریاضیات (ویژه مدارس) — نهم",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C923.pdf"
+                    name: "علوم تجربی (ویژه) — نهم",
+                    url: localPath("motavassete_avval/paye_9_nohom", "oloom_vizhe_nohom")
                 },
                 {
-                    name: "فارسی و نگارش (ویژه مدارس) — نهم",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C922.pdf"
+                    name: "ریاضی (ویژه) — نهم",
+                    url: localPath("motavassete_avval/paye_9_nohom", "riazi_vizhe_nohom")
+                },
+                {
+                    name: "فارسی (ویژه) — نهم",
+                    url: localPath("motavassete_avval/paye_9_nohom", "farsi_vizhe_nohom")
                 },
                 {
                     name: "تعلیمات ادیان الهی (ویژه) — نهم",
-                    url: "http://chap.sch.ir/sites/default/files/lbooks/1404-1405/555/C920.pdf"
+                    url: localPath("motavassete_avval/paye_9_nohom", "adyan_vizhe_nohom")
+                },
+            ],
+
+            /* ═══════════════════════════════════════════
+               پایه دهم — ریاضی فیزیک
+               ═══════════════════════════════════════════ */
+            g10_riazi_fizik: [{
+                    name: "عربی، زبان قرآن (۱)",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/riazi_fizik", "arabi_1_riazi")
+                },
+                {
+                    name: "دین و زندگی (۱)",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/riazi_fizik", "din_zendegi_1_riazi")
+                },
+                {
+                    name: "نگارش (۱)",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/riazi_fizik", "negaresh_1_riazi")
+                },
+                {
+                    name: "فارسی (۱)",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/riazi_fizik", "farsi_1_riazi")
+                },
+                {
+                    name: "هندسه (۱)",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/riazi_fizik", "hendese_1")
+                },
+                {
+                    name: "ریاضی (۱)",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/riazi_fizik", "riazi_1_riazi")
+                },
+                {
+                    name: "فیزیک (۱)",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/riazi_fizik", "fizik_1_riazi")
+                },
+                {
+                    name: "آزمایشگاه علوم (۱)",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/riazi_fizik", "azmayeshgah_1_riazi")
+                },
+                {
+                    name: "آمادگی دفاعی",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/riazi_fizik", "amadegi_defaei_dahom_riazi")
+                },
+                {
+                    name: "انگلیسی (۱)",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/riazi_fizik", "englisi_1_riazi")
+                },
+                {
+                    name: "تعلیمات ادیان الهی (۱)",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/riazi_fizik", "adyan_1_riazi")
+                },
+                {
+                    name: "تفکر و سواد رسانه‌ای",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/riazi_fizik", "tafakkor_savad_rasaneyi_riazi")
+                },
+                {
+                    name: "کارگاه کارآفرینی",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/riazi_fizik", "kargah_karafariini_riazi")
+                },
+                {
+                    name: "از ایرانمان دفاع می‌کنیم",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/riazi_fizik", "az_iranman_defa_riazi")
+                },
+            ],
+
+            /* ═══════════════════════════════════════════
+               پایه دهم — علوم تجربی
+               ═══════════════════════════════════════════ */
+            g10_tajrobi: [{
+                    name: "عربی، زبان قرآن (۱)",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/oloom_tajrobi", "arabi_1_tajrobi")
+                },
+                {
+                    name: "دین و زندگی (۱)",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/oloom_tajrobi", "din_zendegi_1_tajrobi")
+                },
+                {
+                    name: "نگارش (۱)",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/oloom_tajrobi", "negaresh_1_tajrobi")
+                },
+                {
+                    name: "فارسی (۱)",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/oloom_tajrobi", "farsi_1_tajrobi")
+                },
+                {
+                    name: "آمادگی دفاعی",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/oloom_tajrobi", "amadegi_defaei_tajrobi")
+                },
+                {
+                    name: "فیزیک (۱)",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/oloom_tajrobi", "fizik_1_tajrobi")
+                },
+                {
+                    name: "ریاضی (۱)",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/oloom_tajrobi", "riazi_1_tajrobi")
+                },
+                {
+                    name: "شیمی (۱)",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/oloom_tajrobi", "shimi_1_tajrobi")
+                },
+                {
+                    name: "آزمایشگاه علوم (۱)",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/oloom_tajrobi", "azmayeshgah_1_tajrobi")
+                },
+                {
+                    name: "زمین‌شناسی (۱)",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/oloom_tajrobi", "zaminshenaasi_1")
+                },
+                {
+                    name: "انگلیسی (۱)",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/oloom_tajrobi", "englisi_1_tajrobi")
+                },
+                {
+                    name: "تعلیمات ادیان الهی (۱)",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/oloom_tajrobi", "adyan_1_tajrobi")
+                },
+                {
+                    name: "تفکر و سواد رسانه‌ای",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/oloom_tajrobi",
+                        "tafakkor_savad_rasaneyi_tajrobi")
+                },
+                {
+                    name: "کارگاه کارآفرینی",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/oloom_tajrobi", "kargah_karafariini_tajrobi")
+                },
+                {
+                    name: "از ایرانمان دفاع می‌کنیم",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/oloom_tajrobi", "az_iranman_defa_tajrobi")
+                },
+            ],
+
+            /* ═══════════════════════════════════════════
+               پایه دهم — ادبیات و علوم انسانی
+               ═══════════════════════════════════════════ */
+            g10_ensani: [{
+                    name: "دین و زندگی (۱)",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/oloom_ensani", "din_zendegi_1_ensani")
+                },
+                {
+                    name: "علوم و فنون ادبی (۱)",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/oloom_ensani", "oloom_fonon_adabi_1")
+                },
+                {
+                    name: "نگارش (۱)",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/oloom_ensani", "negaresh_1_ensani")
+                },
+                {
+                    name: "فارسی (۱)",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/oloom_ensani", "farsi_1_ensani")
+                },
+                {
+                    name: "جغرافیای ایران",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/oloom_ensani", "joghrafiyaye_iran")
+                },
+                {
+                    name: "آمادگی دفاعی",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/oloom_ensani", "amadegi_defaei_ensani")
+                },
+                {
+                    name: "ریاضی و آمار (۱)",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/oloom_ensani", "riazi_amar_1")
+                },
+                {
+                    name: "عربی، زبان قرآن (۱)",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/oloom_ensani", "arabi_1_ensani")
+                },
+                {
+                    name: "اقتصاد",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/oloom_ensani", "eghtesad")
+                },
+                {
+                    name: "جامعه‌شناسی (۱)",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/oloom_ensani", "jameeshenaasi_1")
+                },
+                {
+                    name: "تاریخ (۱) ایران و جهان",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/oloom_ensani", "tarikh_1_iran_jahan")
+                },
+                {
+                    name: "تفکر و سواد رسانه‌ای",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/oloom_ensani",
+                        "tafakkor_savad_rasaneyi_ensani")
+                },
+                {
+                    name: "منطق",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/oloom_ensani", "manteg")
+                },
+                {
+                    name: "تعلیمات ادیان الهی (۱)",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/oloom_ensani", "adyan_1_ensani")
+                },
+                {
+                    name: "از ایرانمان دفاع می‌کنیم",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/oloom_ensani", "az_iranman_defa_ensani")
+                },
+                {
+                    name: "انگلیسی (۱)",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/oloom_ensani", "englisi_1_ensani")
+                },
+            ],
+
+            /* ═══════════════════════════════════════════
+               پایه دهم — علوم و معارف اسلامی
+               ═══════════════════════════════════════════ */
+            g10_maaref: [{
+                    name: "عربی، زبان قرآن (۱)",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/maaref_eslami", "arabi_1_maaref")
+                },
+                {
+                    name: "علوم و فنون ادبی (۱)",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/maaref_eslami", "oloom_fonon_adabi_1_maaref")
+                },
+                {
+                    name: "نگارش (۱)",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/maaref_eslami", "negaresh_1_maaref")
+                },
+                {
+                    name: "فارسی (۱)",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/maaref_eslami", "farsi_1_maaref")
+                },
+                {
+                    name: "جامعه‌شناسی (۱)",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/maaref_eslami", "jameeshenaasi_1_maaref")
+                },
+                {
+                    name: "جغرافیای ایران",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/maaref_eslami", "joghrafiyaye_iran_maaref")
+                },
+                {
+                    name: "آمادگی دفاعی",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/maaref_eslami", "amadegi_defaei_maaref")
+                },
+                {
+                    name: "ریاضی و آمار (۱)",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/maaref_eslami", "riazi_amar_1_maaref")
+                },
+                {
+                    name: "اقتصاد",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/maaref_eslami", "eghtesad_maaref")
+                },
+                {
+                    name: "کارگاه کارآفرینی",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/maaref_eslami", "kargah_karafariini_maaref")
+                },
+                {
+                    name: "منطق",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/maaref_eslami", "manteg_maaref")
+                },
+                {
+                    name: "انگلیسی (۱)",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/maaref_eslami", "englisi_1_maaref")
+                },
+                {
+                    name: "اصول عقاید (۱)",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/maaref_eslami", "osool_aghaed_1")
+                },
+                {
+                    name: "احکام (۱) پسران",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/maaref_eslami", "ahkam_1_pesaran")
+                },
+                {
+                    name: "تفکر و سواد رسانه‌ای",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/maaref_eslami",
+                        "tafakkor_savad_rasaneyi_maaref")
+                },
+                {
+                    name: "تاریخ اسلام (۱)",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/maaref_eslami", "tarikh_eslam_1")
+                },
+                {
+                    name: "علوم و معارف قرآنی (۱)",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/maaref_eslami", "oloom_maaref_qurani_1")
+                },
+                {
+                    name: "اخلاق اسلامی (۱)",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/maaref_eslami", "akhlagh_eslami_1")
+                },
+                {
+                    name: "از ایرانمان دفاع می‌کنیم",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/maaref_eslami", "az_iranman_defa_maaref")
+                },
+                {
+                    name: "احکام (۱) در دسترس",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/maaref_eslami", "ahkam_1_dastras")
+                },
+            ],
+
+            /* ═══════════════════════════════════════════
+               پایه دهم — فنی و حرفه‌ای
+               ═══════════════════════════════════════════ */
+            g10_fanni: [{
+                    name: "از ایرانمان دفاع می‌کنیم",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/fanni_herfei", "az_iranman_defa_fanni")
+                },
+                {
+                    name: "تعلیمات ادیان الهی (۱)",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/fanni_herfei", "adyan_1_fanni")
+                },
+                {
+                    name: "جغرافیای ایران",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/fanni_herfei", "joghrafiyaye_iran_fanni")
+                },
+                {
+                    name: "دین و زندگی (۱)",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/fanni_herfei", "din_zendegi_1_fanni")
+                },
+                {
+                    name: "الزامات محیط کار",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/fanni_herfei", "elzamat_mohit_kar")
+                },
+                {
+                    name: "انگلیسی (۱)",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/fanni_herfei", "englisi_1_fanni")
+                },
+                {
+                    name: "فارسی و نگارش (۱)",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/fanni_herfei", "farsi_negaresh_1_fanni")
+                },
+                {
+                    name: "عربی، زبان قرآن (۱)",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/fanni_herfei", "arabi_1_fanni")
+                },
+                {
+                    name: "هوش مصنوعی",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/fanni_herfei", "hoosh_masnooi")
+                },
+                {
+                    name: "ریاضی (۱)",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/fanni_herfei", "riazi_1_fanni")
+                },
+            ],
+
+            /* ═══════════════════════════════════════════
+               پایه دهم — کار و دانش
+               ═══════════════════════════════════════════ */
+            g10_kardanesh: [{
+                    name: "از ایرانمان دفاع می‌کنیم",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/kar_danesh", "az_iranman_defa_kardanesh")
+                },
+                {
+                    name: "تعلیمات ادیان الهی (۱)",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/kar_danesh", "adyan_1_kardanesh")
+                },
+                {
+                    name: "جغرافیای ایران",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/kar_danesh", "joghrafiyaye_iran_kardanesh")
+                },
+                {
+                    name: "دین و زندگی (۱)",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/kar_danesh", "din_zendegi_1_kardanesh")
+                },
+                {
+                    name: "الزامات محیط کار",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/kar_danesh", "elzamat_mohit_kar_kardanesh")
+                },
+                {
+                    name: "انگلیسی (۱)",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/kar_danesh", "englisi_1_kardanesh")
+                },
+                {
+                    name: "فارسی و نگارش (۱)",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/kar_danesh", "farsi_negaresh_1_kardanesh")
+                },
+                {
+                    name: "عربی، زبان قرآن (۱)",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/kar_danesh", "arabi_1_kardanesh")
+                },
+                {
+                    name: "هوش مصنوعی",
+                    url: localPath("motavassete_dovvom/paye_10_dahom/kar_danesh", "hoosh_masnooi_kardanesh")
+                },
+            ],
+
+            /* ═══════════════════════════════════════════
+               پایه یازدهم — ریاضی فیزیک
+               ═══════════════════════════════════════════ */
+            g11_riazi_fizik: [{
+                    name: "دین و زندگی (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/riazi_fizik", "din_zendegi_2_riazi")
+                },
+                {
+                    name: "نگارش (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/riazi_fizik", "negaresh_2_riazi")
+                },
+                {
+                    name: "فارسی (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/riazi_fizik", "farsi_2_riazi")
+                },
+                {
+                    name: "هندسه (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/riazi_fizik", "hendese_2")
+                },
+                {
+                    name: "شیمی (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/riazi_fizik", "shimi_2_riazi")
+                },
+                {
+                    name: "فیزیک (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/riazi_fizik", "fizik_2_riazi")
+                },
+                {
+                    name: "عربی، زبان قرآن (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/riazi_fizik", "arabi_2_riazi")
+                },
+                {
+                    name: "تاریخ معاصر",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/riazi_fizik", "tarikh_moaser_riazi")
+                },
+                {
+                    name: "آزمایشگاه علوم (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/riazi_fizik", "azmayeshgah_2_riazi")
+                },
+                {
+                    name: "آمار و احتمال",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/riazi_fizik", "amar_ehtimal")
+                },
+                {
+                    name: "حسابان (۱)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/riazi_fizik", "hesaban_1")
+                },
+                {
+                    name: "زمین‌شناسی",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/riazi_fizik", "zaminshenaasi_riazi")
+                },
+                {
+                    name: "کتاب کار انگلیسی (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/riazi_fizik", "ketabkar_englisi_2_riazi")
+                },
+                {
+                    name: "انگلیسی (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/riazi_fizik", "englisi_2_riazi")
+                },
+                {
+                    name: "تعلیمات ادیان الهی (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/riazi_fizik", "adyan_2_riazi")
+                },
+                {
+                    name: "انسان و محیط زیست",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/riazi_fizik", "ensan_mohit_zist_riazi")
+                },
+            ],
+
+            /* ═══════════════════════════════════════════
+               پایه یازدهم — علوم تجربی
+               ═══════════════════════════════════════════ */
+            g11_tajrobi: [{
+                    name: "نگارش (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/oloom_tajrobi", "negaresh_2_tajrobi")
+                },
+                {
+                    name: "فارسی (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/oloom_tajrobi", "farsi_2_tajrobi")
+                },
+                {
+                    name: "دین و زندگی (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/oloom_tajrobi", "din_zendegi_2_tajrobi")
+                },
+                {
+                    name: "زیست‌شناسی (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/oloom_tajrobi", "zistshenasi_2")
+                },
+                {
+                    name: "ریاضی (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/oloom_tajrobi", "riazi_2_tajrobi")
+                },
+                {
+                    name: "شیمی (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/oloom_tajrobi", "shimi_2_tajrobi")
+                },
+                {
+                    name: "عربی، زبان قرآن (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/oloom_tajrobi", "arabi_2_tajrobi")
+                },
+                {
+                    name: "انگلیسی (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/oloom_tajrobi", "englisi_2_tajrobi")
+                },
+                {
+                    name: "تاریخ معاصر",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/oloom_tajrobi", "tarikh_moaser_tajrobi")
+                },
+                {
+                    name: "آزمایشگاه علوم (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/oloom_tajrobi", "azmayeshgah_2_tajrobi")
+                },
+                {
+                    name: "فیزیک (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/oloom_tajrobi", "fizik_2_tajrobi")
+                },
+                {
+                    name: "تعلیمات ادیان الهی (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/oloom_tajrobi", "adyan_2_tajrobi")
+                },
+                {
+                    name: "ضمیمه دین و زندگی (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/oloom_tajrobi",
+                        "zamime_din_zendegi_2_tajrobi")
+                },
+                {
+                    name: "زمین‌شناسی",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/oloom_tajrobi", "zaminshenaasi_tajrobi")
+                },
+                {
+                    name: "کتاب کار انگلیسی (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/oloom_tajrobi",
+                        "ketabkar_englisi_2_tajrobi")
+                },
+                {
+                    name: "انسان و محیط زیست",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/oloom_tajrobi", "ensan_mohit_zist_tajrobi")
+                },
+                {
+                    name: "هنر",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/oloom_tajrobi", "honar_tajrobi")
+                },
+            ],
+
+            /* ═══════════════════════════════════════════
+               پایه یازدهم — ادبیات و علوم انسانی
+               ═══════════════════════════════════════════ */
+            g11_ensani: [{
+                    name: "علوم و فنون ادبی (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/oloom_ensani", "oloom_fonon_adabi_2")
+                },
+                {
+                    name: "نگارش (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/oloom_ensani", "negaresh_2_ensani")
+                },
+                {
+                    name: "فارسی (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/oloom_ensani", "farsi_2_ensani")
+                },
+                {
+                    name: "جغرافیا (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/oloom_ensani", "joghrafiya_2")
+                },
+                {
+                    name: "ریاضی و آمار (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/oloom_ensani", "riazi_amar_2")
+                },
+                {
+                    name: "عربی، زبان قرآن (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/oloom_ensani", "arabi_2_ensani")
+                },
+                {
+                    name: "دین و زندگی (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/oloom_ensani", "din_zendegi_2_ensani")
+                },
+                {
+                    name: "تاریخ (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/oloom_ensani", "tarikh_2")
+                },
+                {
+                    name: "جامعه‌شناسی (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/oloom_ensani", "jameeshenaasi_2")
+                },
+                {
+                    name: "روان‌شناسی",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/oloom_ensani", "ravanshenasi")
+                },
+                {
+                    name: "فلسفه (۱)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/oloom_ensani", "falsafe_1")
+                },
+                {
+                    name: "تعلیمات ادیان الهی (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/oloom_ensani", "adyan_2_ensani")
+                },
+                {
+                    name: "کتاب کار انگلیسی (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/oloom_ensani", "ketabkar_englisi_2_ensani")
+                },
+                {
+                    name: "انگلیسی (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/oloom_ensani", "englisi_2_ensani")
+                },
+                {
+                    name: "انسان و محیط زیست",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/oloom_ensani", "ensan_mohit_zist_ensani")
+                },
+                {
+                    name: "هنر",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/oloom_ensani", "honar_ensani")
+                },
+                {
+                    name: "ضمیمه دین و زندگی (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/oloom_ensani", "tasmimat_din_zendegi_2")
+                },
+            ],
+
+            /* ═══════════════════════════════════════════
+               پایه یازدهم — علوم و معارف اسلامی
+               ═══════════════════════════════════════════ */
+            g11_maaref: [{
+                    name: "علوم و فنون ادبی (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/maaref_eslami",
+                        "oloom_fonon_adabi_2_maaref")
+                },
+                {
+                    name: "نگارش (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/maaref_eslami", "negaresh_2_maaref")
+                },
+                {
+                    name: "فارسی (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/maaref_eslami", "farsi_2_maaref")
+                },
+                {
+                    name: "ریاضی و آمار (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/maaref_eslami", "riazi_amar_2_maaref")
+                },
+                {
+                    name: "عربی، زبان قرآن (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/maaref_eslami", "arabi_2_maaref")
+                },
+                {
+                    name: "روان‌شناسی",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/maaref_eslami", "ravanshenasi_maaref")
+                },
+                {
+                    name: "اخلاق اسلامی (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/maaref_eslami", "akhlagh_eslami_2")
+                },
+                {
+                    name: "احکام (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/maaref_eslami", "ahkam_2")
+                },
+                {
+                    name: "انسان و محیط زیست",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/maaref_eslami", "ensan_mohit_zist_maaref")
+                },
+                {
+                    name: "علوم و معارف قرآنی (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/maaref_eslami", "oloom_maaref_qurani_2")
+                },
+                {
+                    name: "تاریخ اسلام (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/maaref_eslami", "tarikh_eslam_2")
+                },
+                {
+                    name: "کتاب کار انگلیسی (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/maaref_eslami", "ketabkar_englisi_2_maaref")
+                },
+                {
+                    name: "انگلیسی (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/maaref_eslami", "englisi_2_maaref")
+                },
+                {
+                    name: "هنر",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/maaref_eslami", "honar_maaref")
+                },
+                {
+                    name: "علوم و معارف حقوقی (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/maaref_eslami", "oloom_maaref_hoghooghi_2")
+                },
+            ],
+
+            /* ═══════════════════════════════════════════
+               پایه یازدهم — فنی و حرفه‌ای
+               ═══════════════════════════════════════════ */
+            g11_fanni: [{
+                    name: "انسان و محیط زیست",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/fanni_herfei", "ensan_mohit_zist_fanni")
+                },
+                {
+                    name: "تعلیمات ادیان الهی (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/fanni_herfei", "adyan_2_fanni")
+                },
+                {
+                    name: "هنر",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/fanni_herfei", "honar_fanni")
+                },
+                {
+                    name: "کارگاه نوآوری و کارآفرینی",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/fanni_herfei", "kargah_noavari_fanni")
+                },
+                {
+                    name: "انگلیسی (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/fanni_herfei", "englisi_2_fanni")
+                },
+                {
+                    name: "فارسی و نگارش (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/fanni_herfei", "farsi_negaresh_2_fanni")
+                },
+                {
+                    name: "عربی، زبان قرآن (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/fanni_herfei", "arabi_2_fanni")
+                },
+                {
+                    name: "ریاضی (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/fanni_herfei", "riazi_2_fanni")
+                },
+                {
+                    name: "تفکر و سواد رسانه‌ای",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/fanni_herfei",
+                        "tafakkor_savad_rasaneyi_fanni")
+                },
+                {
+                    name: "دین و زندگی (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/fanni_herfei", "din_zendegi_2_fanni")
+                },
+            ],
+
+            /* ═══════════════════════════════════════════
+               پایه یازدهم — کار و دانش
+               ═══════════════════════════════════════════ */
+            g11_kardanesh: [{
+                    name: "انسان و محیط زیست",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/kar_danesh", "ensan_mohit_zist_kardanesh")
+                },
+                {
+                    name: "تعلیمات ادیان الهی (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/kar_danesh", "adyan_2_kardanesh")
+                },
+                {
+                    name: "دین و زندگی (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/kar_danesh", "din_zendegi_2_kardanesh")
+                },
+                {
+                    name: "هنر",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/kar_danesh", "honar_kardanesh")
+                },
+                {
+                    name: "فارسی و نگارش (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/kar_danesh", "farsi_negaresh_2_kardanesh")
+                },
+                {
+                    name: "انگلیسی (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/kar_danesh", "englisi_2_kardanesh")
+                },
+                {
+                    name: "عربی، زبان قرآن (۲)",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/kar_danesh", "arabi_2_kardanesh")
+                },
+                {
+                    name: "تفکر و سواد رسانه‌ای",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/kar_danesh",
+                        "tafakkor_savad_rasaneyi_kardanesh")
+                },
+                {
+                    name: "تاریخ معاصر",
+                    url: localPath("motavassete_dovvom/paye_11_yazdahom/kar_danesh", "tarikh_moaser_kardanesh")
+                },
+            ],
+
+            /* ═══════════════════════════════════════════
+               پایه دوازدهم — ریاضی فیزیک
+               ═══════════════════════════════════════════ */
+            g12_riazi_fizik: [{
+                    name: "عربی، زبان قرآن (۳)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/riazi_fizik", "arabi_3_riazi")
+                },
+                {
+                    name: "دین و زندگی (۳)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/riazi_fizik", "din_zendegi_3_riazi")
+                },
+                {
+                    name: "نگارش (۳)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/riazi_fizik", "negaresh_3_riazi")
+                },
+                {
+                    name: "فارسی (۳)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/riazi_fizik", "farsi_3_riazi")
+                },
+                {
+                    name: "حسابان (۲)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/riazi_fizik", "hesaban_2")
+                },
+                {
+                    name: "هندسه (۳)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/riazi_fizik", "hendese_3")
+                },
+                {
+                    name: "شیمی (۳)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/riazi_fizik", "shimi_3_riazi")
+                },
+                {
+                    name: "فیزیک (۳)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/riazi_fizik", "fizik_3_riazi")
+                },
+                {
+                    name: "ریاضیات گسسته",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/riazi_fizik", "riazi_gossaste")
+                },
+                {
+                    name: "هویت اجتماعی",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/riazi_fizik", "hoviyyat_ejtemaei_riazi")
+                },
+                {
+                    name: "تعلیمات ادیان الهی (۳)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/riazi_fizik", "adyan_3_riazi")
+                },
+                {
+                    name: "مدیریت خانواده و سبک زندگی (۱)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/riazi_fizik",
+                        "modiriyyat_khanevade_1_riazi")
+                },
+                {
+                    name: "مدیریت خانواده و سبک زندگی (۲)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/riazi_fizik",
+                        "modiriyyat_khanevade_2_riazi")
+                },
+                {
+                    name: "کتاب کار انگلیسی (۳)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/riazi_fizik", "ketabkar_englisi_3_riazi")
+                },
+                {
+                    name: "انگلیسی (۳)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/riazi_fizik", "englisi_3_riazi")
+                },
+            ],
+
+            /* ═══════════════════════════════════════════
+               پایه دوازدهم — علوم تجربی
+               ═══════════════════════════════════════════ */
+            g12_tajrobi: [{
+                    name: "فارسی (۳)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/oloom_tajrobi", "farsi_3_tajrobi")
+                },
+                {
+                    name: "عربی، زبان قرآن (۳)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/oloom_tajrobi", "arabi_3_tajrobi")
+                },
+                {
+                    name: "نگارش (۳)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/oloom_tajrobi", "negaresh_3_tajrobi")
+                },
+                {
+                    name: "دین و زندگی (۳)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/oloom_tajrobi", "din_zendegi_3_tajrobi")
+                },
+                {
+                    name: "زیست‌شناسی (۳)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/oloom_tajrobi", "zistshenasi_3")
+                },
+                {
+                    name: "ریاضی (۳)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/oloom_tajrobi", "riazi_3_tajrobi")
+                },
+                {
+                    name: "شیمی (۳)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/oloom_tajrobi", "shimi_3_tajrobi")
+                },
+                {
+                    name: "فیزیک (۳)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/oloom_tajrobi", "fizik_3_tajrobi")
+                },
+                {
+                    name: "مدیریت خانواده و سبک زندگی (۳)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/oloom_tajrobi",
+                        "modiriyyat_khanevade_3_tajrobi")
+                },
+                {
+                    name: "مدیریت خانواده و سبک زندگی (۴)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/oloom_tajrobi",
+                        "modiriyyat_khanevade_4_tajrobi")
+                },
+                {
+                    name: "کتاب کار انگلیسی (۳)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/oloom_tajrobi",
+                        "ketabkar_englisi_3_tajrobi")
+                },
+                {
+                    name: "انگلیسی (۳)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/oloom_tajrobi", "englisi_3_tajrobi")
+                },
+                {
+                    name: "سلامت و بهداشت",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/oloom_tajrobi", "salamat_behdash_tajrobi")
+                },
+            ],
+
+            /* ═══════════════════════════════════════════
+               پایه دوازدهم — ادبیات و علوم انسانی
+               ═══════════════════════════════════════════ */
+            g12_ensani: [{
+                    name: "فارسی (۳)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/oloom_ensani", "farsi_3_ensani")
+                },
+                {
+                    name: "دین و زندگی (۳)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/oloom_ensani", "din_zendegi_3_ensani")
+                },
+                {
+                    name: "نگارش (۳)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/oloom_ensani", "negaresh_3_ensani")
+                },
+                {
+                    name: "جامعه‌شناسی (۳)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/oloom_ensani", "jameeshenaasi_3")
+                },
+                {
+                    name: "ریاضی و آمار (۳)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/oloom_ensani", "riazi_amar_3")
+                },
+                {
+                    name: "جغرافیا (۳)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/oloom_ensani", "joghrafiya_3")
+                },
+                {
+                    name: "تحلیل فرهنگی",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/oloom_ensani", "tahlil_farhangi")
+                },
+                {
+                    name: "کتاب کار انگلیسی (۳)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/oloom_ensani",
+                        "ketabkar_englisi_3_ensani")
+                },
+                {
+                    name: "انگلیسی (۳)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/oloom_ensani", "englisi_3_ensani")
+                },
+                {
+                    name: "تعلیمات ادیان الهی (۳)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/oloom_ensani", "adyan_3_ensani")
+                },
+                {
+                    name: "سلامت و بهداشت",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/oloom_ensani", "salamat_behdash_ensani")
+                },
+                {
+                    name: "مدیریت خانواده و سبک زندگی (۵)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/oloom_ensani",
+                        "modiriyyat_khanevade_5_ensani")
+                },
+                {
+                    name: "مدیریت خانواده و سبک زندگی (۶)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/oloom_ensani",
+                        "modiriyyat_khanevade_6_ensani")
+                },
+                {
+                    name: "فلسفه (۲)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/oloom_ensani", "falsafe_2_ensani")
+                },
+            ],
+
+            /* ═══════════════════════════════════════════
+               پایه دوازدهم — علوم و معارف اسلامی
+               ═══════════════════════════════════════════ */
+            g12_maaref: [{
+                    name: "عربی، زبان قرآن (۳)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/maaref_eslami", "arabi_3_maaref")
+                },
+                {
+                    name: "نگارش (۳)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/maaref_eslami", "negaresh_3_maaref")
+                },
+                {
+                    name: "فارسی (۳)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/maaref_eslami", "farsi_3_maaref")
+                },
+                {
+                    name: "ریاضی و آمار (۳)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/maaref_eslami", "riazi_amar_3_maaref")
+                },
+                {
+                    name: "انگلیسی (۳)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/maaref_eslami", "englisi_3_maaref")
+                },
+                {
+                    name: "اصول عقاید (۳)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/maaref_eslami", "osool_aghaed_3")
+                },
+                {
+                    name: "فلسفه (۲)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/maaref_eslami", "falsafe_2_maaref")
+                },
+                {
+                    name: "تحلیل فرهنگی",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/maaref_eslami", "tahlil_farhangi_maaref")
+                },
+                {
+                    name: "اخلاق اسلامی (۳)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/maaref_eslami", "akhlagh_eslami_3")
+                },
+                {
+                    name: "روش استنباط احکام (۳)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/maaref_eslami", "ravesh_estenbat_ahkam_3")
+                },
+                {
+                    name: "کتاب کار انگلیسی (۳)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/maaref_eslami",
+                        "ketabkar_englisi_3_maaref")
+                },
+                {
+                    name: "علوم و معارف قرآنی (۳)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/maaref_eslami", "oloom_maaref_qurani_3")
+                },
+                {
+                    name: "مدیریت خانواده و سبک زندگی (۷)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/maaref_eslami",
+                        "modiriyyat_khanevade_7_maaref")
+                },
+                {
+                    name: "مدیریت خانواده و سبک زندگی (۸)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/maaref_eslami",
+                        "modiriyyat_khanevade_8_maaref")
+                },
+                {
+                    name: "سلامت و بهداشت",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/maaref_eslami", "salamat_behdash_maaref")
+                },
+                {
+                    name: "تاریخ (۳)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/maaref_eslami", "tarikh_3_maaref")
+                },
+                {
+                    name: "علوم و فنون ادبی (۳)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/maaref_eslami",
+                        "oloom_fonon_adabi_3_maaref")
+                },
+            ],
+
+            /* ═══════════════════════════════════════════
+               پایه دوازدهم — فنی و حرفه‌ای
+               ═══════════════════════════════════════════ */
+            g12_fanni: [{
+                    name: "مدیریت خانواده و سبک زندگی",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/fanni_herfei",
+                        "modiriyyat_khanevade_fanni")
+                },
+                {
+                    name: "تعلیمات ادیان الهی (۳)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/fanni_herfei", "adyan_3_fanni")
+                },
+                {
+                    name: "هویت اجتماعی",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/fanni_herfei", "hoviyyat_ejtemaei_fanni")
+                },
+                {
+                    name: "دین و زندگی (۳)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/fanni_herfei", "din_zendegi_3_fanni")
+                },
+                {
+                    name: "عربی، زبان قرآن (۳)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/fanni_herfei", "arabi_3_fanni")
+                },
+                {
+                    name: "اخلاق حرفه‌ای",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/fanni_herfei", "akhlagh_herfei_fanni")
+                },
+                {
+                    name: "سلامت و بهداشت",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/fanni_herfei", "salamat_behdash_fanni")
+                },
+                {
+                    name: "مدیریت خانواده و سبک زندگی (۲)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/fanni_herfei",
+                        "modiriyyat_khanevade_2_fanni")
+                },
+                {
+                    name: "فارسی و نگارش (۳)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/fanni_herfei", "farsi_negaresh_3_fanni")
+                },
+                {
+                    name: "آمادگی دفاعی",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/fanni_herfei", "amadegi_defaei_fanni")
+                },
+            ],
+
+            /* ═══════════════════════════════════════════
+               پایه دوازدهم — کار و دانش
+               ═══════════════════════════════════════════ */
+            g12_kardanesh: [{
+                    name: "مدیریت خانواده و سبک زندگی",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/kar_danesh",
+                        "modiriyyat_khanevade_kardanesh")
+                },
+                {
+                    name: "تعلیمات ادیان الهی (۳)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/kar_danesh", "adyan_3_kardanesh")
+                },
+                {
+                    name: "هویت اجتماعی",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/kar_danesh",
+                        "hoviyyat_ejtemaei_kardanesh")
+                },
+                {
+                    name: "دین و زندگی (۳)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/kar_danesh", "din_zendegi_3_kardanesh")
+                },
+                {
+                    name: "مدیریت خانواده و سبک زندگی (۲)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/kar_danesh",
+                        "modiriyyat_khanevade_2_kardanesh")
+                },
+                {
+                    name: "اخلاق حرفه‌ای",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/kar_danesh", "akhlagh_herfei_kardanesh")
+                },
+                {
+                    name: "سلامت و بهداشت",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/kar_danesh", "salamat_behdash_kardanesh")
+                },
+                {
+                    name: "عربی، زبان قرآن (۳)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/kar_danesh", "arabi_3_kardanesh")
+                },
+                {
+                    name: "فارسی و نگارش (۳)",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/kar_danesh", "farsi_negaresh_3_kardanesh")
+                },
+                {
+                    name: "آمادگی دفاعی",
+                    url: localPath("motavassete_dovvom/paye_12_davazdahom/kar_danesh", "amadegi_defaei_kardanesh")
                 },
             ],
         };
-        /* ── رشته → کلید DB ── */
+
+        /* ═══════════════════════════════════════════════════════════════
+           FIELD KEY MAP — نگاشت رشته به کلید BOOKS_DB
+        ═══════════════════════════════════════════════════════════════ */
         const FIELD_KEY_MAP = {
-            "ریاضی فیزیک": "ریاضی_فیزیک",
-            "علوم تجربی": "علوم_تجربی",
-            "ادبیات و علوم انسانی": "ادبیات_علوم_انسانی",
-            "علوم و معارف اسلامی": "علوم_معارف_اسلامی",
+            "ریاضی فیزیک": "riazi_fizik",
+            "علوم تجربی": "tajrobi",
+            "ادبیات و علوم انسانی": "ensani",
+            "علوم و معارف اسلامی": "maaref",
+            "فنی و حرفه‌ای": "fanni",
+            "کار و دانش": "kardanesh",
         };
 
         /* ═══════════════════════════════════════════════════════════════
