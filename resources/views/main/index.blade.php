@@ -287,8 +287,8 @@
     <!-- Hero Section -->
     <section class="hero">
         <div class="hero-content">
-            <h1>🎨 فرم‌ساز حرفه‌ای</h1>
-            <p>ساخت فرم‌های زیبا و حرفه‌ای بدون نیاز به کدنویسی<br>با رابط کاربری ساده و قابلیت‌های پیشرفته</p>
+            <h1>🎨 سوال ساز حرفه‌ای</h1>
+            <p>ساخت فرم‌های زیبا و حرفه‌ای بدون نیاز به زمان <br>با رابط کاربری ساده و قابلیت‌های پیشرفته</p>
             <div class="hero-buttons">
                 <a href="/main" class="btn btn-primary">
                     <i class="fas fa-rocket"></i>
