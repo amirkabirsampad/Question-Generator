@@ -931,8 +931,9 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
     <script src="/_sdk/element_sdk.js" type="text/javascript"></script>
-    <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
-    script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    {{-- <script src="https://cdn.tailwindcss.com" type="text/javascript"></script> --}}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
 <body>
@@ -950,7 +951,7 @@
                     </div>
                 </div>
                 <div class="header-actions"><button class="btn btn-icon" id="darkModeToggle" title="تغییر تم"> <i
-                            class="fas fa-moon"></i> </button> <a href="main/editor" class="btn btn-secondary"> <i
+                            class="fas fa-moon"></i> </button> <a href="/main/editor" class="btn btn-secondary"> <i
                             class="fas fa-edit"></i> ویرایشگر </a>
                 </div>
             </div>
@@ -1114,7 +1115,7 @@
                 } catch (err) {
                     if (err.name === 'AbortError') {
                         throw new Error('درخواست بعد از ' + (timeoutMs / 1000) + ' ثانیه قطع شد (timeout):\n' +
-                        url);
+                            url);
                     }
                     throw err;
                 } finally {
@@ -1464,9 +1465,9 @@
     </script>
     <script>
         /* ═══════════════════════════════════════════════════════════════
-                                                           BOOKS DATABASE — همگام با BOOKS پایتون
-                                                           مسیر لوکال: asset/ketabhaye_darsi_txt_1404-1405/...
-                                                        ═══════════════════════════════════════════════════════════════ */
+                                                               BOOKS DATABASE — همگام با BOOKS پایتون
+                                                               مسیر لوکال: asset/ketabhaye_darsi_txt_1404-1405/...
+                                                            ═══════════════════════════════════════════════════════════════ */
 
         // تابع کمکی برای ساخت URL لوکال
         const localPath = (folder, filename) =>

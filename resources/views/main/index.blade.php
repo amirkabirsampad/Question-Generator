@@ -1,300 +1,81 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>فرم‌ساز حرفه‌ای - ساخت فرم بدون کدنویسی</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100;200;300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        vazir: ['Vazirmatn', 'sans-serif'],
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.8s ease forwards',
+                        'drift': 'drift 20s linear infinite',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': {
+                                opacity: '0',
+                                transform: 'translateY(30px)'
+                            },
+                            '100%': {
+                                opacity: '1',
+                                transform: 'translateY(0)'
+                            },
+                        },
+                        drift: {
+                            '0%': {
+                                transform: 'translate(0, 0)'
+                            },
+                            '100%': {
+                                transform: 'translate(-100px, -100px)'
+                            },
+                        }
+                    }
+                }
+            }
         }
-
+    </script>
+    <style>
         body {
             font-family: 'Vazirmatn', sans-serif;
-            line-height: 1.8;
-            overflow-x: hidden;
-        }
-
-        /* Hero Section */
-        .hero {
-            min-height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .hero::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="2" fill="white" opacity="0.1"/></svg>');
-            animation: drift 20s linear infinite;
-        }
-
-        @keyframes drift {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(-100px, -100px); }
-        }
-
-        .hero-content {
-            text-align: center;
-            max-width: 900px;
-            padding: 2rem;
-            position: relative;
-            z-index: 1;
-        }
-
-        .hero h1 {
-            font-size: 4rem;
-            font-weight: 900;
-            margin-bottom: 1.5rem;
-            animation: fadeInUp 0.8s ease;
-        }
-
-        .hero p {
-            font-size: 1.5rem;
-            margin-bottom: 2.5rem;
-            opacity: 0.95;
-            animation: fadeInUp 0.8s ease 0.2s both;
-        }
-
-        .hero-buttons {
-            display: flex;
-            gap: 1.5rem;
-            justify-content: center;
-            flex-wrap: wrap;
-            animation: fadeInUp 0.8s ease 0.4s both;
-        }
-
-        .btn {
-            padding: 1.2rem 3rem;
-            border: none;
-            border-radius: 50px;
-            font-family: inherit;
-            font-weight: 700;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .btn-primary {
-            background: white;
-            color: #667eea;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
-        }
-
-        .btn-outline {
-            background: transparent;
-            color: white;
-            border: 3px solid white;
-        }
-
-        .btn-outline:hover {
-            background: white;
-            color: #667eea;
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Features Section */
-        .features {
-            padding: 6rem 2rem;
-            background: #f8fafc;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .section-title {
-            text-align: center;
-            font-size: 2.5rem;
-            font-weight: 800;
-            color: #2d3748;
-            margin-bottom: 1rem;
-        }
-
-        .section-subtitle {
-            text-align: center;
-            font-size: 1.2rem;
-            color: #718096;
-            margin-bottom: 4rem;
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2.5rem;
-        }
-
-        .feature-card {
-            background: white;
-            padding: 2.5rem;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-            transition: all 0.3s ease;
-        }
-
-        .feature-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
-        }
-
-        .feature-icon {
-            width: 70px;
-            height: 70px;
-            border-radius: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            color: white;
-            margin-bottom: 1.5rem;
-        }
-
-        .feature-card:nth-child(1) .feature-icon { background: linear-gradient(135deg, #667eea, #764ba2); }
-        .feature-card:nth-child(2) .feature-icon { background: linear-gradient(135deg, #f093fb, #f5576c); }
-        .feature-card:nth-child(3) .feature-icon { background: linear-gradient(135deg, #4facfe, #00f2fe); }
-        .feature-card:nth-child(4) .feature-icon { background: linear-gradient(135deg, #43e97b, #38f9d7); }
-        .feature-card:nth-child(5) .feature-icon { background: linear-gradient(135deg, #fa709a, #fee140); }
-        .feature-card:nth-child(6) .feature-icon { background: linear-gradient(135deg, #30cfd0, #330867); }
-
-        .feature-card h3 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #2d3748;
-            margin-bottom: 1rem;
-        }
-
-        .feature-card p {
-            color: #718096;
-            font-size: 1.05rem;
-            line-height: 1.8;
-        }
-
-        /* Stats Section */
-        .stats {
-            padding: 6rem 2rem;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 3rem;
-            text-align: center;
-        }
-
-        .stat-item h2 {
-            font-size: 4rem;
-            font-weight: 900;
-            margin-bottom: 0.5rem;
-        }
-
-        .stat-item p {
-            font-size: 1.2rem;
-            opacity: 0.95;
-        }
-
-        /* CTA Section */
-        .cta {
-            padding: 6rem 2rem;
-            background: white;
-            text-align: center;
-        }
-
-        .cta h2 {
-            font-size: 3rem;
-            font-weight: 800;
-            color: #2d3748;
-            margin-bottom: 1.5rem;
-        }
-
-        .cta p {
-            font-size: 1.3rem;
-            color: #718096;
-            margin-bottom: 3rem;
-        }
-
-        /* Footer */
-        footer {
-            padding: 3rem 2rem;
-            background: #2d3748;
-            color: white;
-            text-align: center;
-        }
-
-        footer p {
-            opacity: 0.8;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .hero h1 {
-                font-size: 2.5rem;
-            }
-
-            .hero p {
-                font-size: 1.2rem;
-            }
-
-            .hero-buttons {
-                flex-direction: column;
-            }
-
-            .section-title {
-                font-size: 2rem;
-            }
-
-            .cta h2 {
-                font-size: 2rem;
-            }
         }
     </style>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body>
+
+<body class="font-vazir leading-relaxed overflow-x-hidden">
+
     <!-- Hero Section -->
-    <section class="hero">
-        <div class="hero-content">
-            <h1>🎨 سوال ساز حرفه‌ای</h1>
-            <p>ساخت فرم‌های زیبا و حرفه‌ای بدون نیاز به زمان <br>با رابط کاربری ساده و قابلیت‌های پیشرفته</p>
-            <div class="hero-buttons">
-                <a href="/main" class="btn btn-primary">
+    <section
+        class="min-h-screen bg-gradient-to-br from-[#667eea] to-[#764ba2] text-white flex items-center justify-center relative overflow-hidden">
+        <!-- Animated background pattern -->
+
+        <div class="text-center max-w-4xl px-8 relative z-10">
+            <h1 class="text-4xl md:text-6xl font-black mb-6 animate-fade-in-up">
+                🎨 سوال ساز حرفه‌ای
+            </h1>
+            <p class="text-xl md:text-2xl mb-10 opacity-95 animate-fade-in-up" style="animation-delay: 0.2s;">
+                ساخت فرم‌های زیبا و حرفه‌ای بدون نیاز به زمان <br>
+                با رابط کاربری ساده و قابلیت‌های پیشرفته
+            </p>
+            <div class="flex flex-col sm:flex-row gap-6 justify-center animate-fade-in-up"
+                style="animation-delay: 0.4s;">
+                <a href="/main"
+                    class="inline-flex items-center justify-center gap-3 px-10 py-4 bg-white text-[#667eea] font-bold text-lg rounded-full shadow-xl hover:-translate-y-1 hover:shadow-2xl transition-all duration-300">
                     <i class="fas fa-rocket"></i>
                     شروع کنید
                 </a>
-                <a href="dashboard.html" class="btn btn-outline">
+                <a href="dashboard.html"
+                    class="inline-flex items-center justify-center gap-3 px-10 py-4 bg-transparent text-white font-bold text-lg rounded-full border-[3px] border-white hover:bg-white hover:text-[#667eea] transition-all duration-300">
                     <i class="fas fa-chart-line"></i>
                     داشبورد
                 </a>
@@ -303,93 +84,132 @@
     </section>
 
     <!-- Features Section -->
-    <section class="features">
-        <div class="container">
-            <h2 class="section-title">ویژگی‌های منحصر به فرد</h2>
-            <p class="section-subtitle">همه چیز برای ساخت فرم‌های عالی</p>
+    <section class="py-24 px-8 bg-slate-50">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-center text-3xl md:text-4xl font-extrabold text-slate-800 mb-4">
+                ویژگی‌های منحصر به فرد
+            </h2>
+            <p class="text-center text-lg text-slate-500 mb-16">
+                همه چیز برای ساخت فرم‌های عالی
+            </p>
 
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                <!-- Feature 1 -->
+                <div
+                    class="bg-white p-10 rounded-2xl shadow-lg hover:-translate-y-2 hover:shadow-2xl transition-all duration-300">
+                    <div
+                        class="w-16 h-16 rounded-xl flex items-center justify-center text-2xl text-white mb-6 bg-gradient-to-br from-[#667eea] to-[#764ba2]">
                         <i class="fas fa-hand-pointer"></i>
                     </div>
-                    <h3>Drag & Drop</h3>
-                    <p>با کشیدن و رها کردن ساده، فرم خود را طراحی کنید. نیازی به کدنویسی نیست!</p>
+                    <h3 class="text-xl font-bold text-slate-800 mb-4">Drag & Drop</h3>
+                    <p class="text-slate-500 text-base leading-relaxed">
+                        با کشیدن و رها کردن ساده، فرم خود را طراحی کنید. نیازی به کدنویسی نیست!
+                    </p>
                 </div>
 
-                <div class="feature-card">
-                    <div class="feature-icon">
+                <!-- Feature 2 -->
+                <div
+                    class="bg-white p-10 rounded-2xl shadow-lg hover:-translate-y-2 hover:shadow-2xl transition-all duration-300">
+                    <div
+                        class="w-16 h-16 rounded-xl flex items-center justify-center text-2xl text-white mb-6 bg-gradient-to-br from-[#f093fb] to-[#f5576c]">
                         <i class="fas fa-palette"></i>
                     </div>
-                    <h3>طراحی مدرن</h3>
-                    <p>رابط کاربری زیبا با انیمیشن‌های روان و طراحی Gradient منحصر به فرد</p>
+                    <h3 class="text-xl font-bold text-slate-800 mb-4">طراحی مدرن</h3>
+                    <p class="text-slate-500 text-base leading-relaxed">
+                        رابط کاربری زیبا با انیمیشن‌های روان و طراحی Gradient منحصر به فرد
+                    </p>
                 </div>
 
-                <div class="feature-card">
-                    <div class="feature-icon">
+                <!-- Feature 3 -->
+                <div
+                    class="bg-white p-10 rounded-2xl shadow-lg hover:-translate-y-2 hover:shadow-2xl transition-all duration-300">
+                    <div
+                        class="w-16 h-16 rounded-xl flex items-center justify-center text-2xl text-white mb-6 bg-gradient-to-br from-[#4facfe] to-[#00f2fe]">
                         <i class="fas fa-mobile-alt"></i>
                     </div>
-                    <h3>Responsive</h3>
-                    <p>فرم‌های شما در تمام دستگاه‌ها به صورت کامل Responsive هستند</p>
+                    <h3 class="text-xl font-bold text-slate-800 mb-4">Responsive</h3>
+                    <p class="text-slate-500 text-base leading-relaxed">
+                        فرم‌های شما در تمام دستگاه‌ها به صورت کامل Responsive هستند
+                    </p>
                 </div>
 
-                <div class="feature-card">
-                    <div class="feature-icon">
+                <!-- Feature 4 -->
+                <div
+                    class="bg-white p-10 rounded-2xl shadow-lg hover:-translate-y-2 hover:shadow-2xl transition-all duration-300">
+                    <div
+                        class="w-16 h-16 rounded-xl flex items-center justify-center text-2xl text-white mb-6 bg-gradient-to-br from-[#43e97b] to-[#38f9d7]">
                         <i class="fas fa-chart-bar"></i>
                     </div>
-                    <h3>داشبورد کامل</h3>
-                    <p>مدیریت فرم‌ها، مشاهده آمار و تحلیل داده‌ها در یک پنل حرفه‌ای</p>
+                    <h3 class="text-xl font-bold text-slate-800 mb-4">داشبورد کامل</h3>
+                    <p class="text-slate-500 text-base leading-relaxed">
+                        مدیریت فرم‌ها، مشاهده آمار و تحلیل داده‌ها در یک پنل حرفه‌ای
+                    </p>
                 </div>
 
-                <div class="feature-card">
-                    <div class="feature-icon">
+                <!-- Feature 5 -->
+                <div
+                    class="bg-white p-10 rounded-2xl shadow-lg hover:-translate-y-2 hover:shadow-2xl transition-all duration-300">
+                    <div
+                        class="w-16 h-16 rounded-xl flex items-center justify-center text-2xl text-white mb-6 bg-gradient-to-br from-[#fa709a] to-[#fee140]">
                         <i class="fas fa-layer-group"></i>
                     </div>
-                    <h3>قالب‌های آماده</h3>
-                    <p>شروع سریع با قالب‌های از پیش طراحی شده برای موارد مختلف</p>
+                    <h3 class="text-xl font-bold text-slate-800 mb-4">قالب‌های آماده</h3>
+                    <p class="text-slate-500 text-base leading-relaxed">
+                        شروع سریع با قالب‌های از پیش طراحی شده برای موارد مختلف
+                    </p>
                 </div>
 
-                <div class="feature-card">
-                    <div class="feature-icon">
+                <!-- Feature 6 -->
+                <div
+                    class="bg-white p-10 rounded-2xl shadow-lg hover:-translate-y-2 hover:shadow-2xl transition-all duration-300">
+                    <div
+                        class="w-16 h-16 rounded-xl flex items-center justify-center text-2xl text-white mb-6 bg-gradient-to-br from-[#30cfd0] to-[#330867]">
                         <i class="fas fa-moon"></i>
                     </div>
-                    <h3>Dark Mode</h3>
-                    <p>پشتیبانی کامل از حالت تاریک برای راحتی بیشتر در شب</p>
+                    <h3 class="text-xl font-bold text-slate-800 mb-4">Dark Mode</h3>
+                    <p class="text-slate-500 text-base leading-relaxed">
+                        پشتیبانی کامل از حالت تاریک برای راحتی بیشتر در شب
+                    </p>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Stats Section -->
-    <section class="stats">
-        <div class="container">
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <h2>21+</h2>
-                    <p>نوع فیلد مختلف</p>
+    <section class="py-24 px-8 bg-gradient-to-br from-[#667eea] to-[#764ba2] text-white">
+        <div class="max-w-6xl mx-auto">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-12 text-center">
+                <div>
+                    <h2 class="text-5xl md:text-6xl font-black mb-2">21+</h2>
+                    <p class="text-lg opacity-95">نوع فیلد مختلف</p>
                 </div>
-                <div class="stat-item">
-                    <h2>100%</h2>
-                    <p>رایگان و متن‌باز</p>
+                <div>
+                    <h2 class="text-5xl md:text-6xl font-black mb-2">100%</h2>
+                    <p class="text-lg opacity-95">رایگان و متن‌باز</p>
                 </div>
-                <div class="stat-item">
-                    <h2>4</h2>
-                    <p>قالب آماده</p>
+                <div>
+                    <h2 class="text-5xl md:text-6xl font-black mb-2">4</h2>
+                    <p class="text-lg opacity-95">قالب آماده</p>
                 </div>
-                <div class="stat-item">
-                    <h2>∞</h2>
-                    <p>امکانات بی‌نهایت</p>
+                <div>
+                    <h2 class="text-5xl md:text-6xl font-black mb-2">∞</h2>
+                    <p class="text-lg opacity-95">امکانات بی‌نهایت</p>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- CTA Section -->
-    <section class="cta">
-        <div class="container">
-            <h2>آماده شروع هستید؟</h2>
-            <p>همین الان اولین فرم خود را ایجاد کنید</p>
-            <a href="index.html" class="btn btn-primary" style="font-size: 1.2rem; padding: 1.5rem 4rem;">
+    <section class="py-24 px-8 bg-white text-center">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-3xl md:text-5xl font-extrabold text-slate-800 mb-6">
+                آماده شروع هستید؟
+            </h2>
+            <p class="text-xl text-slate-500 mb-12">
+                همین الان اولین فرم خود را ایجاد کنید
+            </p>
+            <a href="index.html"
+                class="inline-flex items-center justify-center gap-3 px-12 py-5 bg-white text-[#667eea] font-bold text-xl rounded-full shadow-xl hover:-translate-y-1 hover:shadow-2xl transition-all duration-300 border border-slate-200">
                 <i class="fas fa-magic"></i>
                 شروع رایگان
             </a>
@@ -397,11 +217,13 @@
     </section>
 
     <!-- Footer -->
-    <footer>
-        <div class="container">
-            <p>ساخته شده با ❤️ برای جامعه توسعه‌دهندگان ایرانی</p>
-            <p style="margin-top: 1rem; opacity: 0.6;">نسخه 2.5 - Dashboard Edition</p>
+    <footer class="py-12 px-8 bg-slate-800 text-white text-center">
+        <div class="max-w-6xl mx-auto">
+            <p class="opacity-80">ساخته شده با ❤️ برای جامعه توسعه‌دهندگان ایرانی</p>
+            <p class="mt-4 opacity-60">نسخه 2.5 - Dashboard Edition</p>
         </div>
     </footer>
+
 </body>
+
 </html>

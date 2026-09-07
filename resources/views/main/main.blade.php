@@ -1,32 +1,42 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="fa" dir="rtl">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"><!-- SEO Meta Tags -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- SEO Meta Tags -->
     <title>سوال‌ساز هوشمند | تولید خودکار سوالات آزمون با هوش مصنوعی</title>
     <meta name="description"
-        content="سوال‌ساز هوشمند با هوش مصنوعی، PDF درس شما را تبدیل به سوالات آزمون ����رفه‌ای می‌کند. رایگان امتحان کنید و زمان خود را ��رفه‌جویی کنید.">
+        content="سوال‌ساز هوشمند با هوش مصنوعی، PDF درس شما را تبدیل به سوالات آزمون حرفه‌ای می‌کند. رایگان امتحان کنید و زمان خود را صرفه‌جویی کنید.">
     <meta name="keywords" content="سوال‌ساز، تولید سوال، هوش مصنوعی، آزمون، تست، تشریحی، معلم، استاد، مدرسه">
     <meta name="author" content="سوال‌ساز هوشمند">
-    <meta name="robots" content="index, follow"><!-- Open Graph / Facebook -->
+    <meta name="robots" content="index, follow">
+
+    <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://soalsaz.com/">
     <meta property="og:title" content="سوال‌ساز هوشمند | تولید خودکار سوالات آزمون">
     <meta property="og:description" content="با هوش مصنوعی، در چند ثانیه سوالات آزمون حرفه‌ای بسازید!">
-    <meta property="og:image" content="https://soalsaz.com/og-image.jpg"><!-- Twitter -->
+    <meta property="og:image" content="https://soalsaz.com/og-image.jpg">
+
+    <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://soalsaz.com/">
     <meta property="twitter:title" content="سوال‌ساز هوشمند | تولید خودکار سوالات آزمون">
     <meta property="twitter:description" content="با هوش مصنوعی، در چند ثانیه سوالات آزمون حرفه‌ای بسازید!">
+
     <!-- Canonical URL -->
-    <link rel="canonical" href="https://soalsaz.com/"><!-- Fonts & Icons -->
+    <link rel="canonical" href="https://soalsaz.com/">
+
+    <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@@100;200;300;400;500;600;700;800;900&amp;display=swap"
+        href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100;200;300;400;500;600;700;800;900&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <!-- Schema.org Markup -->
     <script type="application/ld+json">
     {
@@ -48,1211 +58,697 @@
       }
     }
     </script>
+
+    <script src="{{ asset('asset/js/tailwind.js') }}"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        vazir: ['Vazirmatn', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#667eea',
+                        secondary: '#764ba2',
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.8s ease forwards',
+                        'float': 'float 3s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': {
+                                opacity: '0',
+                                transform: 'translateY(30px)'
+                            },
+                            '100%': {
+                                opacity: '1',
+                                transform: 'translateY(0)'
+                            },
+                        },
+                        float: {
+                            '0%, 100%': {
+                                transform: 'translateY(0)'
+                            },
+                            '50%': {
+                                transform: 'translateY(-5px)'
+                            },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
     <style>
-                        body {
-                            box-sizing: border-box;
-                        }
-
-                        /* Reset & Base */
-                        * {
-                            margin: 0;
-                            padding: 0;
-                            box-sizing: border-box;
-                        }
-
-                        :root {
-                            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-
-                            --primary: #667eea;
-                            --secondary: #764ba2;
-                            --accent: #f093fb;
-                            --success: #48bb78;
-                            --warning: #ed8936;
-                            --danger: #f56565;
-                            --dark: #2d3748;
-                            --light: #f7fafc;
-                            --text-primary: #2d3748;
-                            --text-secondary: #718096;
-                            --border-color: #e2e8f0;
-                            --dark-gradient: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
-                            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.1);
-
-                        }
-
-                        html {
-                            scroll-behavior: smooth;
-                        }
-
-                        body {
-                            font-family: 'Vazirmatn', sans-serif;
-                            line-height: 1.6;
-                            color: var(--text-primary);
-                            background: white;
-                            overflow-x: hidden;
-                        }
-
-                        body.dark-mode {
-                            --light: #1a202c;
-                            --text-primary: #f7fafc;
-                            --text-secondary: #cbd5e0;
-                            --border-color: #4a5568;
-                            background: #1a202c;
-                        }
-
-                        /* Header */
-                        .app-header {
-                            background: var(--dark-gradient);
-                            color: white;
-                            padding: 1rem 2rem;
-                            box-shadow: var(--shadow-md);
-                            position: fixed;
-                            top: 0;
-                            width: 100%;
-                            z-index: 50;
-                            overflow: hidden;
-                        }
-
-
-
-                        .header-content {
-                            display: flex;
-                            justify-content: space-between;
-                            align-items: center;
-                            gap: 2rem;
-                        }
-
-                        .header-brand {
-                            display: flex;
-                            align-items: center;
-                            gap: 1rem;
-                        }
-
-                        .brand-icon {
-                            width: 48px;
-                            height: 48px;
-                            background: var(--primary-gradient);
-                            border-radius: 12px;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            font-size: 1.5rem;
-                            animation: float 3s ease-in-out infinite;
-                        }
-
-                        @@keyframes float {
-
-                            0%,
-                            100% {
-                                transform: translateY(0px);
-                            }
-
-                            50% {
-                                transform: translateY(-5px);
-                            }
-                        }
-
-                        .brand-text h1 {
-                            font-size: 1.5rem;
-                            font-weight: 700;
-                            margin: 0;
-                            line-height: 1.2;
-                        }
-
-                        .brand-subtitle {
-                            font-size: 0.75rem;
-                            color: #a0aec0;
-                            font-weight: 400;
-                        }
-
-                        .header-actions {
-                            display: flex;
-                            gap: 0.5rem;
-                            align-items: center;
-                        }
-
-                .btn {
-                    padding: 0.6rem 1.25rem;
-                    border: none;
-                    border-radius: 10px;
-                    cursor: pointer;
-                    font-family: inherit;
-                    font-weight: 600;
-                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                    display: inline-flex;
-                    align-items: center;
-                    gap: 0.5rem;
-                    text-decoration: none;
-                    position: relative;
-                    overflow: hidden;
-                }
-
-                .btn::before {
-                    content: '';
-                    position: absolute;
-                    top: 50%;
-                    left: 50%;
-                    width: 0;
-                    height: 0;
-                    border-radius: 50%;
-                    background: rgba(255,255,255,0.3);
-                    transform: translate(-50%, -50%);
-                    transition: width 0.6s, height 0.6s;
-                }
-
-                .btn:hover::before {
-                    width: 300px;
-                    height: 300px;
-                }
-
-                .btn:hover {
-                    transform: translateY(-2px);
-                    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-                }
-
-                .btn:active {
-                    transform: translateY(0);
-                }
-
-                .btn-icon {
-                    padding: 0.6rem;
-                    width: 40px;
-                    height: 40px;
-                    justify-content: center;
-                    background: rgba(255,255,255,0.1);
-                    color: white;
-                }
-
-                .btn-icon:hover {
-                    background: rgba(255,255,255,0.2);
-                }
-
-                .btn-primary {
-                    background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
-                    color: white;
-                }
-
-                .btn-secondary {
-                    background: linear-gradient(135deg, #718096 0%, #4a5568 100%);
-                    color: white;
-                }
-
-                .btn-success {
-                    background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
-                    color: white;
-                }
-
-                .btn-info {
-                    background: linear-gradient(135deg, #38b2ac 0%, #319795 100%);
-                    color: white;
-                }
-
-                .btn-danger {
-                    background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
-                    color: white;
-                }
-
-                .btn-gradient {
-                    background: var(--primary-gradient);
-                    color: white;
-                    font-weight: 700;
-                }
-
-                .btn-outline {
-                    background: transparent;
-                    border: 2px solid var(--border-color);
-                    color: var(--text-primary);
-                }
-
-                .btn-outline:hover {
-                    background: var(--bg-color);
-                }
-
-                .btn-sm {
-                    padding: 0.4rem 0.9rem;
-                    font-size: 0.875rem;
-                }
-
-                        /* Hero Section */
-                        .hero {
-                            padding: 10rem 2rem 6rem;
-                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                            position: relative;
-                            overflow: hidden;
-                        }
-
-                        .hero::before {
-                            content: '';
-                            position: absolute;
-                            top: 0;
-                            left: 0;
-                            right: 0;
-                            bottom: 0;
-                            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="rgba(255,255,255,0.1)" d="M0,96L48,112C96,128,192,160,288,165.3C384,171,480,149,576,154.7C672,160,768,192,864,197.3C960,203,1056,181,1152,165.3C1248,149,1344,139,1392,133.3L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') no-repeat bottom;
-                            background-size: cover;
-                            opacity: 0.3;
-                        }
-
-                        .hero-content {
-                            max-width: 1200px;
-                            margin: 0 auto;
-                            text-align: center;
-                            position: relative;
-                            z-index: 1;
-                        }
-
-                        .hero h1 {
-                            font-size: 3.5rem;
-                            font-weight: 900;
-                            color: white;
-                            margin-bottom: 1.5rem;
-                            line-height: 1.2;
-                            animation: fadeInUp 0.8s ease;
-                        }
-
-                        .hero p {
-                            font-size: 1.35rem;
-                            color: rgba(255, 255, 255, 0.95);
-                            margin-bottom: 2.5rem;
-                            animation: fadeInUp 0.8s ease 0.2s both;
-                        }
-
-                        .hero-cta {
-                            display: flex;
-                            gap: 1.5rem;
-                            justify-content: center;
-                            animation: fadeInUp 0.8s ease 0.4s both;
-                        }
-
-                        .hero-cta .btn {
-                            font-size: 1.2rem;
-                            padding: 1rem 2.5rem;
-                        }
-
-                        .btn-white {
-                            background: white;
-                            color: var(--primary);
-                        }
-
-                        /* Stats Section */
-                        .stats {
-                            padding: 4rem 2rem;
-                            background: white;
-                            border-bottom: 1px solid var(--border-color);
-                        }
-
-                        body.dark-mode .stats {
-                            background: #2d3748;
-                        }
-
-                        .stats-container {
-                            max-width: 1200px;
-                            margin: 0 auto;
-                            display: grid;
-                            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-                            gap: 3rem;
-                        }
-
-                        .stat-item {
-                            text-align: center;
-                            animation: fadeInUp 0.6s ease;
-                        }
-
-                        .stat-number {
-                            font-size: 3rem;
-                            font-weight: 900;
-                            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-                            -webkit-background-clip: text;
-                            -webkit-text-fill-color: transparent;
-                            margin-bottom: 0.5rem;
-                        }
-
-                        .stat-label {
-                            font-size: 1.1rem;
-                            color: var(--text-secondary);
-                            font-weight: 600;
-                        }
-
-                        /* Features Section */
-                        .features {
-                            padding: 6rem 2rem;
-                            background: var(--light);
-                        }
-
-                        .section-header {
-                            text-align: center;
-                            max-width: 700px;
-                            margin: 0 auto 4rem;
-                        }
-
-                        .section-title {
-                            font-size: 2.5rem;
-                            font-weight: 800;
-                            margin-bottom: 1rem;
-                            color: var(--text-primary);
-                        }
-
-                        .section-subtitle {
-                            font-size: 1.15rem;
-                            color: var(--text-secondary);
-                        }
-
-                        .features-grid {
-                            max-width: 1200px;
-                            margin: 0 auto;
-                            display: grid;
-                            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-                            gap: 2rem;
-                        }
-
-                        .feature-card {
-                            background: white;
-                            padding: 2.5rem;
-                            border-radius: 20px;
-                            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-                            transition: all 0.3s ease;
-                            animation: fadeInUp 0.6s ease;
-                        }
-
-                        body.dark-mode .feature-card {
-                            background: #2d3748;
-                        }
-
-                        .feature-card:hover {
-                            transform: translateY(-10px);
-                            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.2);
-                        }
-
-                        .feature-icon {
-                            width: 70px;
-                            height: 70px;
-                            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-                            border-radius: 15px;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            font-size: 2rem;
-                            color: white;
-                            margin-bottom: 1.5rem;
-                        }
-
-                        .feature-card h3 {
-                            font-size: 1.5rem;
-                            font-weight: 700;
-                            margin-bottom: 1rem;
-                            color: var(--text-primary);
-                        }
-
-                        .feature-card p {
-                            color: var(--text-secondary);
-                            line-height: 1.8;
-                        }
-
-                        /* How It Works */
-                        .how-it-works {
-                            padding: 6rem 2rem;
-                            background: white;
-                        }
-
-                        body.dark-mode .how-it-works {
-                            background: #1a202c;
-                        }
-
-                        .steps-container {
-                            max-width: 1000px;
-                            margin: 0 auto;
-                            display: grid;
-                            gap: 3rem;
-                        }
-
-                        .step {
-                            display: flex;
-                            gap: 2rem;
-                            align-items: center;
-                            animation: fadeInUp 0.6s ease;
-                        }
-
-                        .step:nth-child(even) {
-                            flex-direction: row-reverse;
-                        }
-
-                        .step-number {
-                            flex-shrink: 0;
-                            width: 80px;
-                            height: 80px;
-                            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-                            border-radius: 50%;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            font-size: 2rem;
-                            font-weight: 900;
-                            color: white;
-                        }
-
-                        .step-content h3 {
-                            font-size: 1.75rem;
-                            font-weight: 700;
-                            margin-bottom: 0.75rem;
-                            color: var(--text-primary);
-                        }
-
-                        .step-content p {
-                            font-size: 1.1rem;
-                            color: var(--text-secondary);
-                            line-height: 1.8;
-                        }
-
-                        /* Pricing Section */
-                        .pricing {
-                            padding: 6rem 2rem;
-                            background: var(--light);
-                        }
-
-                        .pricing-grid {
-                            max-width: 1200px;
-                            margin: 0 auto;
-                            display: grid;
-                            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-                            gap: 2rem;
-                        }
-
-                        .pricing-card {
-                            background: white;
-                            border-radius: 20px;
-                            padding: 3rem 2rem;
-                            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-                            transition: all 0.3s ease;
-                            text-align: center;
-                            position: relative;
-                        }
-
-                        body.dark-mode .pricing-card {
-                            background: #2d3748;
-                        }
-
-                        .pricing-card.featured {
-                            transform: scale(1.05);
-                            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
-                        }
-
-                        .pricing-badge {
-                            position: absolute;
-                            top: -15px;
-                            right: 50%;
-                            transform: translateX(50%);
-                            background: linear-gradient(135deg, var(--warning) 0%, var(--danger) 100%);
-                            color: white;
-                            padding: 0.5rem 1.5rem;
-                            border-radius: 50px;
-                            font-weight: 700;
-                            font-size: 0.9rem;
-                        }
-
-                        .pricing-card h3 {
-                            font-size: 1.75rem;
-                            font-weight: 700;
-                            margin-bottom: 1rem;
-                            color: var(--text-primary);
-                        }
-
-                        .pricing-price {
-                            font-size: 3rem;
-                            font-weight: 900;
-                            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-                            -webkit-background-clip: text;
-                            -webkit-text-fill-color: transparent;
-                            margin-bottom: 0.5rem;
-                        }
-
-                        .pricing-period {
-                            color: var(--text-secondary);
-                            margin-bottom: 2rem;
-                        }
-
-                        .pricing-features {
-                            list-style: none;
-                            margin-bottom: 2rem;
-                            text-align: right;
-                        }
-
-                        .pricing-features li {
-                            padding: 0.75rem 0;
-                            color: var(--text-secondary);
-                            border-bottom: 1px solid var(--border-color);
-                        }
-
-                        .pricing-features li i {
-                            color: var(--success);
-                            margin-left: 0.5rem;
-                        }
-
-                        /* Testimonials */
-                        .testimonials {
-                            padding: 6rem 2rem;
-                            background: white;
-                        }
-
-                        body.dark-mode .testimonials {
-                            background: #1a202c;
-                        }
-
-                        .testimonials-grid {
-                            max-width: 1200px;
-                            margin: 0 auto;
-                            display: grid;
-                            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-                            gap: 2rem;
-                        }
-
-                        .testimonial-card {
-                            background: var(--light);
-                            padding: 2.5rem;
-                            border-radius: 20px;
-                            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-                            transition: all 0.3s ease;
-                        }
-
-                        body.dark-mode .testimonial-card {
-                            background: #2d3748;
-                        }
-
-                        .testimonial-card:hover {
-                            transform: translateY(-5px);
-                            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-                        }
-
-                        .testimonial-rating {
-                            color: #fbbf24;
-                            font-size: 1.25rem;
-                            margin-bottom: 1rem;
-                        }
-
-                        .testimonial-text {
-                            font-size: 1.05rem;
-                            color: var(--text-secondary);
-                            line-height: 1.8;
-                            margin-bottom: 1.5rem;
-                        }
-
-                        .testimonial-author {
-                            display: flex;
-                            align-items: center;
-                            gap: 1rem;
-                        }
-
-                        .author-avatar {
-                            width: 50px;
-                            height: 50px;
-                            border-radius: 50%;
-                            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            color: white;
-                            font-weight: 700;
-                            font-size: 1.25rem;
-                        }
-
-                        .author-info h4 {
-                            font-weight: 700;
-                            color: var(--text-primary);
-                            margin-bottom: 0.25rem;
-                        }
-
-                        .author-info p {
-                            font-size: 0.9rem;
-                            color: var(--text-secondary);
-                        }
-
-                        /* FAQ Section */
-                        .faq {
-                            padding: 6rem 2rem;
-                            background: var(--light);
-                        }
-
-                        .faq-container {
-                            max-width: 800px;
-                            margin: 0 auto;
-                        }
-
-                        .faq-item {
-                            background: white;
-                            border-radius: 15px;
-                            margin-bottom: 1.5rem;
-                            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-                            overflow: hidden;
-                        }
-
-                        body.dark-mode .faq-item {
-                            background: #2d3748;
-                        }
-
-                        .faq-question {
-                            padding: 1.5rem 2rem;
-                            cursor: pointer;
-                            display: flex;
-                            justify-content: space-between;
-                            align-items: center;
-                            font-weight: 700;
-                            color: var(--text-primary);
-                            transition: all 0.3s ease;
-                        }
-
-                        .faq-question:hover {
-                            background: rgba(102, 126, 234, 0.05);
-                        }
-
-                        .faq-question i {
-                            transition: transform 0.3s ease;
-                            color: var(--primary);
-                        }
-
-                        .faq-item.active .faq-question i {
-                            transform: rotate(180deg);
-                        }
-
-                        .faq-answer {
-                            max-height: 0;
-                            overflow: hidden;
-                            transition: max-height 0.3s ease;
-                        }
-
-                        .faq-item.active .faq-answer {
-                            max-height: 500px;
-                        }
-
-                        .faq-answer-content {
-                            padding: 0 2rem 1.5rem;
-                            color: var(--text-secondary);
-                            line-height: 1.8;
-                        }
-
-                        /* CTA Section */
-                        .cta {
-                            padding: 6rem 2rem;
-                            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-                            text-align: center;
-                            position: relative;
-                            overflow: hidden;
-                        }
-
-                        .cta::before {
-                            content: '';
-                            position: absolute;
-                            top: 0;
-                            left: 0;
-                            right: 0;
-                            bottom: 0;
-                            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="rgba(255,255,255,0.05)" d="M0,96L48,112C96,128,192,160,288,165.3C384,171,480,149,576,154.7C672,160,768,192,864,197.3C960,203,1056,181,1152,165.3C1248,149,1344,139,1392,133.3L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') no-repeat bottom;
-                            background-size: cover;
-                        }
-
-                        .cta-content {
-                            position: relative;
-                            z-index: 1;
-                        }
-
-                        .cta h2 {
-                            font-size: 3rem;
-                            font-weight: 900;
-                            color: white;
-                            margin-bottom: 1.5rem;
-                        }
-
-                        .cta p {
-                            font-size: 1.25rem;
-                            color: rgba(255, 255, 255, 0.95);
-                            margin-bottom: 2.5rem;
-                        }
-
-                        /* Footer */
-                        .footer {
-                            background: #1a202c;
-                            color: white;
-                            padding: 3rem 2rem 1.5rem;
-                        }
-
-                        .footer-content {
-                            max-width: 1200px;
-                            margin: 0 auto;
-                            display: grid;
-                            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-                            gap: 3rem;
-                            margin-bottom: 2rem;
-                        }
-
-                        .footer-section h3 {
-                            margin-bottom: 1.5rem;
-                            font-weight: 700;
-                        }
-
-                        .footer-links {
-                            list-style: none;
-                        }
-
-                        .footer-links li {
-                            margin-bottom: 0.75rem;
-                        }
-
-                        .footer-links a {
-                            color: rgba(255, 255, 255, 0.7);
-                            text-decoration: none;
-                            transition: color 0.3s ease;
-                        }
-
-                        .footer-links a:hover {
-                            color: white;
-                        }
-
-                        .footer-bottom {
-                            border-top: 1px solid rgba(255, 255, 255, 0.1);
-                            padding-top: 1.5rem;
-                            text-align: center;
-                            color: rgba(255, 255, 255, 0.7);
-                        }
-
-                        /* Animations */
-                        @@keyframes fadeInUp {
-                            from {
-                                opacity: 0;
-                                transform: translateY(30px);
-                            }
-
-                            to {
-                                opacity: 1;
-                                transform: translateY(0);
-                            }
-                        }
-
-                        /* Scroll Animation */
-                        .animate-on-scroll {
-                            opacity: 0;
-                            transform: translateY(30px);
-                            transition: all 0.6s ease;
-                        }
-
-                        .animate-on-scroll.animated {
-                            opacity: 1;
-                            transform: translateY(0);
-                        }
-
-                        /* Responsive */
-                        @@media (max-width: 768px) {
-                            .hero h1 {
-                                font-size: 2rem;
-                            }
-
-                            .hero p {
-                                font-size: 1rem;
-                            }
-
-                            .hero-cta {
-                                flex-direction: column;
-                            }
-
-                            .section-title {
-                                font-size: 1.75rem;
-                            }
-
-                            .step {
-                                flex-direction: column !important;
-                                text-align: center;
-                            }
-
-                            .cta h2 {
-                                font-size: 2rem;
-                            }
-
-                            .pricing-card.featured {
-                                transform: scale(1);
-                            }
-                        }
+        body {
+            font-family: 'Vazirmatn', Tahoma, sans-serif !important;
+        }
+
+        /* بقیه استایل‌ها */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .faq-item.active .faq-answer {
+            max-height: 500px;
+        }
+
+        .faq-item.active .faq-question i {
+            transform: rotate(180deg);
+        }
+
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+
+        .animate-on-scroll.animated {
+            opacity: 1;
+            transform: translateY(0);
+        }
     </style>
-    <!-- <style>@@view-transition { navigation: auto; }</style> -->
-    <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
-    <script src="/_sdk/element_sdk.js" type="text/javascript"></script>
-    <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
-
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body><!-- Header -->
-    <header class="app-header">
-        <div class="header-content">
-            <div class="header-brand">
-                <div class="brand-icon"><i class="fas fa-brain"></i>
+<body class="font-vazir bg-white text-slate-800 dark:bg-slate-900 dark:text-slate-100 overflow-x-hidden">
+
+    <!-- Header -->
+    <header class="fixed top-0 w-full z-50 bg-gradient-to-br from-slate-800 to-slate-900 text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center gap-8">
+            <div class="flex items-center gap-4">
+                <div
+                    class="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center text-2xl animate-float">
+                    <i class="fas fa-brain"></i>
                 </div>
-                <div class="brand-text">
-                    <h1>سوال‌ساز هوشمند</h1>
-                    <div class="brand-subtitle">
-                        تولید سوال با هوش مصنوعی
-                    </div>
+                <div>
+                    <h1 class="text-xl font-bold leading-tight">سوال‌ساز هوشمند</h1>
+                    <div class="text-xs text-slate-400 font-normal">تولید سوال با هوش مصنوعی</div>
                 </div>
             </div>
-            <div class="header-actions"><button class="btn btn-icon" id="darkModeToggle" title="تغییر تم"> <i
-                        class="fas fa-moon"></i> </button> <a href="/form" class="btn btn-secondary"> <i
-                        class="fas fa-book"></i> تولید سوال </a>
+            <div class="flex items-center gap-2">
+                <button id="darkModeToggle"
+                    class="w-10 h-10 flex items-center justify-center rounded-xl bg-white/10 hover:bg-white/20 transition-all"
+                    title="تغییر تم">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <a href="form/"
+                    class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-br from-slate-500 to-slate-600 hover:from-slate-400 hover:to-slate-500 text-white font-semibold transition-all hover:-translate-y-0.5 hover:shadow-lg">
+                    <i class="fas fa-book"></i>
+                    تولید سوال
+                </a>
             </div>
         </div>
-    </header><!-- Hero Section -->
-    <section class="hero">
-        <div class="hero-content">
-            <h1>تولید سوالات آزمون با هوش مصنوعی 🧠</h1>
-            <p>PDF درس خود را آپلود کنید، در عرض چند ثانیه سوالات حرفه‌ای دریافت کنید!<br>
-                بدون نیاز به ثبت‌نام، کاملاً رایگان</p>
-            <div class="hero-cta"><a href="main/form" class="btn btn-white"> <i class="fas fa-rocket"></i> همین الان شروع
-                    کنید </a> <a href="#how-it-works" class="btn btn-outline"
-                    style="color: white; border-color: white;"> <i class="fas fa-play-circle"></i> نحوه کار </a>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="pt-40 pb-24 px-6 bg-gradient-to-br from-primary to-secondary relative overflow-hidden">
+        <!-- Wave decoration -->
+        <div
+            class="absolute inset-0 opacity-30 bg-[url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 1440 320\"><path fill=\"rgba(255,255,255,0.1)\" d=\"M0,96L48,112C96,128,192,160,288,165.3C384,171,480,149,576,154.7C672,160,768,192,864,197.3C960,203,1056,181,1152,165.3C1248,149,1344,139,1392,133.3L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z\"></path></svg>')] bg-no-repeat bg-bottom bg-cover">
+        </div>
+
+        <div class="max-w-5xl mx-auto text-center relative z-10">
+            <h1 class="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-6 leading-tight animate-fade-in-up">
+                تولید سوالات آزمون با هوش مصنوعی 🧠
+            </h1>
+            <p class="text-lg md:text-xl text-white/95 mb-10 animate-fade-in-up" style="animation-delay: 0.2s;">
+                PDF درس خود را آپلود کنید، در عرض چند ثانیه سوالات حرفه‌ای دریافت کنید!<br>
+                بدون نیاز به ثبت‌نام، کاملاً رایگان
+            </p>
+            <div class="flex flex-col sm:flex-row gap-6 justify-center animate-fade-in-up"
+                style="animation-delay: 0.4s;">
+                <a href="main/form"
+                    class="inline-flex items-center justify-center gap-3 px-10 py-4 bg-white text-primary font-bold text-lg rounded-xl shadow-xl hover:-translate-y-1 hover:shadow-2xl transition-all">
+                    <i class="fas fa-rocket"></i>
+                    برو به فرم
+                </a>
+                <a href="#how-it-works"
+                    class="inline-flex items-center justify-center gap-3 px-10 py-4 bg-transparent text-white font-bold text-lg rounded-xl border-2 border-white hover:bg-white hover:text-primary transition-all">
+                    <i class="fas fa-play-circle"></i>
+                    نحوه کار
+                </a>
             </div>
         </div>
-    </section><!-- Stats Section -->
-    <section class="stats">
-        <div class="stats-container">
-            <div class="stat-item animate-on-scroll">
-                <div class="stat-number">
+    </section>
+
+    <!-- Stats Section -->
+    <section class="py-16 px-6 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
+        <div class="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-10">
+            <div class="text-center animate-on-scroll">
+                <div
+                    class="text-4xl md:text-5xl font-black bg-gradient-to-br from-primary to-secondary bg-clip-text text-transparent mb-2">
                     12,500+
                 </div>
-                <div class="stat-label">
+                <div class="text-base font-semibold text-slate-500 dark:text-slate-400">
                     سوال تولید شده
                 </div>
             </div>
-            <div class="stat-item animate-on-scroll">
-                <div class="stat-number">
+            <div class="text-center animate-on-scroll">
+                <div
+                    class="text-4xl md:text-5xl font-black bg-gradient-to-br from-primary to-secondary bg-clip-text text-transparent mb-2">
                     1,250+
                 </div>
-                <div class="stat-label">
+                <div class="text-base font-semibold text-slate-500 dark:text-slate-400">
                     معلم راضی
                 </div>
             </div>
-            <div class="stat-item animate-on-scroll">
-                <div class="stat-number">
+            <div class="text-center animate-on-scroll">
+                <div
+                    class="text-4xl md:text-5xl font-black bg-gradient-to-br from-primary to-secondary bg-clip-text text-transparent mb-2">
                     4.8/5
                 </div>
-                <div class="stat-label">
+                <div class="text-base font-semibold text-slate-500 dark:text-slate-400">
                     امتیاز کاربران
                 </div>
             </div>
-            <div class="stat-item animate-on-scroll">
-                <div class="stat-number">
+            <div class="text-center animate-on-scroll">
+                <div
+                    class="text-4xl md:text-5xl font-black bg-gradient-to-br from-primary to-secondary bg-clip-text text-transparent mb-2">
                     30 ثانیه
                 </div>
-                <div class="stat-label">
+                <div class="text-base font-semibold text-slate-500 dark:text-slate-400">
                     سرعت تولید
                 </div>
             </div>
         </div>
-    </section><!-- Features Section -->
-    <section class="features" id="features">
-        <div class="section-header">
-            <h2 class="section-title">چرا سوال‌ساز هوشمند؟</h2>
-            <p class="section-subtitle">ابزاری حرفه‌ای برای معلمان و اساتید برای صرفه‌جویی در وقت</p>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-24 px-6 bg-slate-50 dark:bg-slate-900" id="features">
+        <div class="max-w-3xl mx-auto text-center mb-16">
+            <h2 class="text-3xl md:text-4xl font-extrabold text-slate-800 dark:text-white mb-4">چرا سوال‌ساز هوشمند؟
+            </h2>
+            <p class="text-lg text-slate-500 dark:text-slate-400">ابزاری حرفه‌ای برای معلمان و اساتید برای صرفه‌جویی در
+                وقت</p>
         </div>
-        <div class="features-grid">
-            <div class="feature-card animate-on-scroll">
-                <div class="feature-icon"><i class="fas fa-magic"></i>
+
+        <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Feature 1 -->
+            <div
+                class="bg-white dark:bg-slate-800 p-10 rounded-2xl shadow-lg hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary/20 transition-all duration-300 animate-on-scroll">
+                <div
+                    class="w-16 h-16 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center text-2xl text-white mb-6">
+                    <i class="fas fa-magic"></i>
                 </div>
-                <h3>هوش مصنوعی پیشرفته</h3>
-                <p>با استفاده از آخرین تکنولوژی‌های AI، سوالات با کیفیت بالا و متنوع تولید می‌کنیم</p>
+                <h3 class="text-xl font-bold text-slate-800 dark:text-white mb-4">هوش مصنوعی پیشرفته</h3>
+                <p class="text-slate-500 dark:text-slate-400 leading-relaxed">با استفاده از آخرین تکنولوژی‌های AI،
+                    سوالات با کیفیت بالا و متنوع تولید می‌کنیم</p>
             </div>
-            <div class="feature-card animate-on-scroll">
-                <div class="feature-icon"><i class="fas fa-bolt"></i>
+
+            <!-- Feature 2 -->
+            <div
+                class="bg-white dark:bg-slate-800 p-10 rounded-2xl shadow-lg hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary/20 transition-all duration-300 animate-on-scroll">
+                <div
+                    class="w-16 h-16 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center text-2xl text-white mb-6">
+                    <i class="fas fa-bolt"></i>
                 </div>
-                <h3>سرعت بالا</h3>
-                <p>در کمتر از 30 ثانیه، آزمون کامل شما آماده دانلود است</p>
+                <h3 class="text-xl font-bold text-slate-800 dark:text-white mb-4">سرعت بالا</h3>
+                <p class="text-slate-500 dark:text-slate-400 leading-relaxed">در کمتر از 30 ثانیه، آزمون کامل شما آماده
+                    دانلود است</p>
             </div>
-            <div class="feature-card animate-on-scroll">
-                <div class="feature-icon"><i class="fas fa-check-double"></i>
+
+            <!-- Feature 3 -->
+            <div
+                class="bg-white dark:bg-slate-800 p-10 rounded-2xl shadow-lg hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary/20 transition-all duration-300 animate-on-scroll">
+                <div
+                    class="w-16 h-16 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center text-2xl text-white mb-6">
+                    <i class="fas fa-check-double"></i>
                 </div>
-                <h3>تنوع سوالات</h3>
-                <p>سوالات تستی، تشریحی، جاخالی و درست/غلط در یک پلتفرم</p>
+                <h3 class="text-xl font-bold text-slate-800 dark:text-white mb-4">تنوع سوالات</h3>
+                <p class="text-slate-500 dark:text-slate-400 leading-relaxed">سوالات تستی، تشریحی، جاخالی و درست/غلط در
+                    یک پلتفرم</p>
             </div>
-            <div class="feature-card animate-on-scroll">
-                <div class="feature-icon"><i class="fas fa-file-pdf"></i>
+
+            <!-- Feature 4 -->
+            <div
+                class="bg-white dark:bg-slate-800 p-10 rounded-2xl shadow-lg hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary/20 transition-all duration-300 animate-on-scroll">
+                <div
+                    class="w-16 h-16 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center text-2xl text-white mb-6">
+                    <i class="fas fa-file-pdf"></i>
                 </div>
-                <h3>خروجی  PDFوA4 برای امتحان </h3>
-                <p>فایل PDF با فرمت استاندارد و آماده چاپ دریافت کنید</p>
+                <h3 class="text-xl font-bold text-slate-800 dark:text-white mb-4">خروجی PDF و A4 برای امتحان</h3>
+                <p class="text-slate-500 dark:text-slate-400 leading-relaxed">فایل PDF با فرمت استاندارد و آماده چاپ
+                    دریافت کنید</p>
             </div>
-            <div class="feature-card animate-on-scroll">
-                <div class="feature-icon"><i class="fas fa-edit"></i>
+
+            <!-- Feature 5 -->
+            <div
+                class="bg-white dark:bg-slate-800 p-10 rounded-2xl shadow-lg hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary/20 transition-all duration-300 animate-on-scroll">
+                <div
+                    class="w-16 h-16 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center text-2xl text-white mb-6">
+                    <i class="fas fa-edit"></i>
                 </div>
-                <h3>ویرایشگر آنلاین</h3>
-                <p>قبل از دانلود، سوالات را ویرایش و شخصی‌سازی کنید</p>
+                <h3 class="text-xl font-bold text-slate-800 dark:text-white mb-4">ویرایشگر آنلاین</h3>
+                <p class="text-slate-500 dark:text-slate-400 leading-relaxed">قبل از دانلود، سوالات را ویرایش و
+                    شخصی‌سازی کنید</p>
             </div>
-            <div class="feature-card animate-on-scroll">
-                <div class="feature-icon"><i class="fas fa-lock"></i>
+
+            <!-- Feature 6 -->
+            <div
+                class="bg-white dark:bg-slate-800 p-10 rounded-2xl shadow-lg hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary/20 transition-all duration-300 animate-on-scroll">
+                <div
+                    class="w-16 h-16 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center text-2xl text-white mb-6">
+                    <i class="fas fa-lock"></i>
                 </div>
-                <h3>امنیت کامل</h3>
-                <p>فایل‌های شما بلافاصله پس از پردازش حذف می‌شوند</p>
+                <h3 class="text-xl font-bold text-slate-800 dark:text-white mb-4">امنیت کامل</h3>
+                <p class="text-slate-500 dark:text-slate-400 leading-relaxed">فایل‌های شما بلافاصله پس از پردازش حذف
+                    می‌شوند</p>
             </div>
         </div>
-    </section><!-- How It Works -->
-    <section class="how-it-works" id="how-it-works">
-        <div class="section-header">
-            <h2 class="section-title">چطور کار می‌کند؟</h2>
-            <p class="section-subtitle">فقط 3 قدم تا دریافت آزمون آماده</p>
+    </section>
+
+    <!-- How It Works -->
+    <section class="py-24 px-6 bg-white dark:bg-slate-900" id="how-it-works">
+        <div class="max-w-3xl mx-auto text-center mb-16">
+            <h2 class="text-3xl md:text-4xl font-extrabold text-slate-800 dark:text-white mb-4">چطور کار می‌کند؟</h2>
+            <p class="text-lg text-slate-500 dark:text-slate-400">فقط 3 قدم تا دریافت آزمون آماده</p>
         </div>
-        <div class="steps-container">
-            <div class="step animate-on-scroll">
-                <div class="step-number">
+
+        <div class="max-w-4xl mx-auto space-y-12">
+            <!-- Step 1 -->
+            <div class="flex flex-col md:flex-row items-center gap-8 animate-on-scroll">
+                <div
+                    class="flex-shrink-0 w-20 h-20 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center text-3xl font-black text-white">
                     1
                 </div>
-                <div class="step-content">
-                    <h3>PDF درس را آپلود کنید</h3>
-                    <p>فایل PDF جزوه یا کتاب درسی خود را در سیستم بارگذاری کنید. حداکثر حجم 16 مگابایت</p>
+                <div class="text-center md:text-right">
+                    <h3 class="text-2xl font-bold text-slate-800 dark:text-white mb-3">PDF درس را آپلود کنید</h3>
+                    <p class="text-lg text-slate-500 dark:text-slate-400 leading-relaxed">فایل PDF جزوه یا کتاب درسی
+                        خود را در سیستم بارگذاری کنید. حداکثر حجم ۱۶ مگابایت</p>
                 </div>
             </div>
-            <div class="step animate-on-scroll">
-                <div class="step-number">
+
+            <!-- Step 2 -->
+            <div class="flex flex-col md:flex-row-reverse items-center gap-8 animate-on-scroll">
+                <div
+                    class="flex-shrink-0 w-20 h-20 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center text-3xl font-black text-white">
                     2
                 </div>
-                <div class="step-content">
-                    <h3>تنظیمات را انتخاب کنید</h3>
-                    <p>تعداد سوالات، نوع سوالات و سایر جزئیات آزمون را مشخص کنید</p>
+                <div class="text-center md:text-right">
+                    <h3 class="text-2xl font-bold text-slate-800 dark:text-white mb-3">تنظیمات را انتخاب کنید</h3>
+                    <p class="text-lg text-slate-500 dark:text-slate-400 leading-relaxed">تعداد سوالات، نوع سوالات و
+                        سایر جزئیات آزمون را مشخص کنید</p>
                 </div>
             </div>
-            <div class="step animate-on-scroll">
-                <div class="step-number">
+
+            <!-- Step 3 -->
+            <div class="flex flex-col md:flex-row items-center gap-8 animate-on-scroll">
+                <div
+                    class="flex-shrink-0 w-20 h-20 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center text-3xl font-black text-white">
                     3
                 </div>
-                <div class="step-content">
-                    <h3>دانلود PDF</h3>
-                    <p>پس از تولید، سوالات را ویرایش کنید و فایل PDF نهایی را دانلود کنید</p>
+                <div class="text-center md:text-right">
+                    <h3 class="text-2xl font-bold text-slate-800 dark:text-white mb-3">دانلود PDF</h3>
+                    <p class="text-lg text-slate-500 dark:text-slate-400 leading-relaxed">پس از تولید، سوالات را ویرایش
+                        کنید و فایل PDF نهایی را دانلود کنید</p>
                 </div>
             </div>
         </div>
-    </section><!-- Pricing -->
-    <section class="pricing" id="pricing">
-        <div class="section-header">
-            <h2 class="section-title">پلن‌های قیمت‌گذاری</h2>
-            <p class="section-subtitle">برای هر نیازی، یک پلن مناسب داریم</p>
+    </section>
+
+    <!-- Pricing -->
+    <section class="py-24 px-6 bg-slate-50 dark:bg-slate-900" id="pricing">
+        <div class="max-w-3xl mx-auto text-center mb-16">
+            <h2 class="text-3xl md:text-4xl font-extrabold text-slate-800 dark:text-white mb-4">پلن‌های قیمت‌گذاری</h2>
+            <p class="text-lg text-slate-500 dark:text-slate-400">برای هر نیازی، یک پلن مناسب داریم</p>
         </div>
-        <div class="pricing-grid">
-            <div class="pricing-card animate-on-scroll">
-                <h3>رایگان</h3>
-                <div class="pricing-price">
-                    0 تومان
+
+        <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Free Plan -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-lg text-center animate-on-scroll">
+                <h3 class="text-2xl font-bold text-slate-800 dark:text-white mb-4">رایگان</h3>
+                <div
+                    class="text-4xl font-black bg-gradient-to-br from-primary to-secondary bg-clip-text text-transparent mb-2">
+                    ۰ تومان
                 </div>
-                <div class="pricing-period">
-                    برای همیشه
-                </div>
-                <ul class="pricing-features">
-                    <li><i class="fas fa-check"></i> 5 سوال در هر آزمون</li>
-                    <li><i class="fas fa-check"></i> تمام انواع سوالات</li>
-                    <li><i class="fas fa-check"></i> خروجی PDF</li>
-                    <li><i class="fas fa-check"></i> ویرایشگر آنلاین</li>
-                </ul><a href="/form" class="btn btn-outline">شروع رایگان</a>
+                <div class="text-slate-500 dark:text-slate-400 mb-8">برای همیشه</div>
+                <ul class="space-y-4 mb-8 text-right">
+                    <li
+                        class="flex items-center gap-2 text-slate-600 dark:text-slate-300 border-b border-slate-200 dark:border-slate-700 pb-3">
+                        <i class="fas fa-check text-green-500"></i>
+                        ۵ سوال در هر آزمون
+                    </li>
+                    <li
+                        class="flex items-center gap-2 text-slate-600 dark:text-slate-300 border-b border-slate-200 dark:border-slate-700 pb-3">
+                        <i class="fas fa-check text-green-500"></i>
+                        تمام انواع سوالات
+                    </li>
+                    <li
+                        class="flex items-center gap-2 text-slate-600 dark:text-slate-300 border-b border-slate-200 dark:border-slate-700 pb-3">
+                        <i class="fas fa-check text-green-500"></i>
+                        خروجی PDF
+                    </li>
+                    <li class="flex items-center gap-2 text-slate-600 dark:text-slate-300">
+                        <i class="fas fa-check text-green-500"></i>
+                        ویرایشگر آنلاین
+                    </li>
+                </ul>
+                <a href="/form"
+                    class="inline-block w-full py-3 rounded-xl border-2 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 font-semibold hover:bg-slate-100 dark:hover:bg-slate-700 transition-all">
+                    شروع رایگان
+                </a>
             </div>
-            <div class="pricing-card featured animate-on-scroll">
-                <div class="pricing-badge">
+
+            <!-- Pro Plan -->
+            <div
+                class="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-xl shadow-primary/20 text-center relative scale-105 animate-on-scroll">
+                <div
+                    class="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-orange-400 to-red-500 text-white px-6 py-1.5 rounded-full font-bold text-sm">
                     محبوب‌ترین
                 </div>
-                <h3>حرفه‌ای</h3>
-                <div class="pricing-price">
-                    199,000 تومان
+                <h3 class="text-2xl font-bold text-slate-800 dark:text-white mb-4">حرفه‌ای</h3>
+                <div
+                    class="text-4xl font-black bg-gradient-to-br from-primary to-secondary bg-clip-text text-transparent mb-2">
+                    ۱۹۹,۰۰۰ تومان
                 </div>
-                <div class="pricing-period">
-                    ماهانه
-                </div>
-                <ul class="pricing-features">
-                    <li><i class="fas fa-check"></i> 50 سوال در هر آزمون</li>
-                    <li><i class="fas fa-check"></i> تمام انواع سوالات</li>
-                    <li><i class="fas fa-check"></i> خروجی PDF</li>
-                    <li><i class="fas fa-check"></i> ویرایشگر پیشرفته</li>
-                    <li><i class="fas fa-check"></i> پشتیبانی اختصاصی</li>
-                </ul><a href="/form" class="btn btn-primary">شروع کنید</a>
+                <div class="text-slate-500 dark:text-slate-400 mb-8">ماهانه</div>
+                <ul class="space-y-4 mb-8 text-right">
+                    <li
+                        class="flex items-center gap-2 text-slate-600 dark:text-slate-300 border-b border-slate-200 dark:border-slate-700 pb-3">
+                        <i class="fas fa-check text-green-500"></i>
+                        ۵۰ سوال در هر آزمون
+                    </li>
+                    <li
+                        class="flex items-center gap-2 text-slate-600 dark:text-slate-300 border-b border-slate-200 dark:border-slate-700 pb-3">
+                        <i class="fas fa-check text-green-500"></i>
+                        تمام انواع سوالات
+                    </li>
+                    <li
+                        class="flex items-center gap-2 text-slate-600 dark:text-slate-300 border-b border-slate-200 dark:border-slate-700 pb-3">
+                        <i class="fas fa-check text-green-500"></i>
+                        خروجی PDF
+                    </li>
+                    <li
+                        class="flex items-center gap-2 text-slate-600 dark:text-slate-300 border-b border-slate-200 dark:border-slate-700 pb-3">
+                        <i class="fas fa-check text-green-500"></i>
+                        ویرایشگر پیشرفته
+                    </li>
+                    <li class="flex items-center gap-2 text-slate-600 dark:text-slate-300">
+                        <i class="fas fa-check text-green-500"></i>
+                        پشتیبانی اختصاصی
+                    </li>
+                </ul>
+                <a href="/form"
+                    class="inline-block w-full py-3 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white font-semibold hover:from-blue-400 hover:to-blue-500 transition-all hover:-translate-y-0.5 hover:shadow-lg">
+                    شروع کنید
+                </a>
             </div>
-            <div class="pricing-card animate-on-scroll">
-                <h3>سازمانی</h3>
-                <div class="pricing-price">
+
+            <!-- Enterprise Plan -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-lg text-center animate-on-scroll">
+                <h3 class="text-2xl font-bold text-slate-800 dark:text-white mb-4">سازمانی</h3>
+                <div
+                    class="text-4xl font-black bg-gradient-to-br from-primary to-secondary bg-clip-text text-transparent mb-2">
                     تماس بگیرید
                 </div>
-                <div class="pricing-period">
-                    سفارشی
-                </div>
-                <ul class="pricing-features">
-                    <li><i class="fas fa-check"></i> نامحدود</li>
-                    <li><i class="fas fa-check"></i> API اختصاصی</li>
-                    <li><i class="fas fa-check"></i> سفارشی‌سازی کامل</li>
-                    <li><i class="fas fa-check"></i> آموزش تیم</li>
-                    <li><i class="fas fa-check"></i> پشتیبانی 24/7</li>
-                </ul><a href="#" class="btn btn-outline">تماس با ما</a>
+                <div class="text-slate-500 dark:text-slate-400 mb-8">سفارشی</div>
+                <ul class="space-y-4 mb-8 text-right">
+                    <li
+                        class="flex items-center gap-2 text-slate-600 dark:text-slate-300 border-b border-slate-200 dark:border-slate-700 pb-3">
+                        <i class="fas fa-check text-green-500"></i>
+                        نامحدود
+                    </li>
+                    <li
+                        class="flex items-center gap-2 text-slate-600 dark:text-slate-300 border-b border-slate-200 dark:border-slate-700 pb-3">
+                        <i class="fas fa-check text-green-500"></i>
+                        API اختصاصی
+                    </li>
+                    <li
+                        class="flex items-center gap-2 text-slate-600 dark:text-slate-300 border-b border-slate-200 dark:border-slate-700 pb-3">
+                        <i class="fas fa-check text-green-500"></i>
+                        سفارشی‌سازی کامل
+                    </li>
+                    <li
+                        class="flex items-center gap-2 text-slate-600 dark:text-slate-300 border-b border-slate-200 dark:border-slate-700 pb-3">
+                        <i class="fas fa-check text-green-500"></i>
+                        آموزش تیم
+                    </li>
+                    <li class="flex items-center gap-2 text-slate-600 dark:text-slate-300">
+                        <i class="fas fa-check text-green-500"></i>
+                        پشتیبانی ۲۴/۷
+                    </li>
+                </ul>
+                <a href="#"
+                    class="inline-block w-full py-3 rounded-xl border-2 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 font-semibold hover:bg-slate-100 dark:hover:bg-slate-700 transition-all">
+                    تماس با ما
+                </a>
             </div>
         </div>
-    </section><!-- Testimonials -->
-    <section class="testimonials">
-        <div class="section-header">
-            <h2 class="section-title">نظرات کاربران</h2>
-            <p class="section-subtitle">معلمان درباره سوال‌ساز چه می‌گویند</p>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="py-24 px-6 bg-white dark:bg-slate-900">
+        <div class="max-w-3xl mx-auto text-center mb-16">
+            <h2 class="text-3xl md:text-4xl font-extrabold text-slate-800 dark:text-white mb-4">نظرات کاربران</h2>
+            <p class="text-lg text-slate-500 dark:text-slate-400">معلمان درباره سوال‌ساز چه می‌گویند</p>
         </div>
-        <div class="testimonials-grid">
-            <div class="testimonial-card animate-on-scroll">
-                <div class="testimonial-rating"><i class="fas fa-star"></i> <i class="fas fa-star"></i> <i
-                        class="fas fa-star"></i> <i class="fas fa-star"></i> <i class="fas fa-star"></i>
-                </div>
-                <p class="testimonial-text">"قبلاً ساعت‌ها برای تهیه سوالات وقت می‌گذاشتم. الان با سوال‌ساز هوشمند، در
-                    چند دقیقه آزمون آماده دارم!"</p>
-                <div class="testimonial-author">
-                    <div class="author-avatar">
+
+        <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Testimonial 1 -->
+            <div
+                class="bg-slate-50 dark:bg-slate-800 p-8 rounded-2xl shadow-lg hover:-translate-y-1 hover:shadow-xl transition-all animate-on-scroll">
+                <div class="flex items-center gap-4 mb-4">
+                    <div
+                        class="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold text-lg">
                         م
                     </div>
-                    <div class="author-info">
-                        <h4>مریم احمدی</h4>
-                        <p>دبیر ریاضی - تهران</p>
+                    <div>
+                        <h4 class="font-bold text-slate-800 dark:text-white">مریم احمدی</h4>
+                        <p class="text-sm text-slate-500 dark:text-slate-400">دبیر ریاضی - تهران</p>
                     </div>
                 </div>
-            </div>
-            <div class="testimonial-card animate-on-scroll">
-                <div class="testimonial-rating"><i class="fas fa-star"></i> <i class="fas fa-star"></i> <i
-                        class="fas fa-star"></i> <i class="fas fa-star"></i> <i class="fas fa-star"></i>
+                <div class="text-yellow-400 text-xl mb-4">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
                 </div>
-                <p class="testimonial-text">"سوالات تولید شده واقعاً با کیفیت و متنوع هستند. دانش‌آموزانم هم از تنوع
-                    سوالات راضی‌اند."</p>
-                <div class="testimonial-author">
-                    <div class="author-avatar">
+                <p class="text-slate-600 dark:text-slate-300 leading-relaxed mb-6">
+                    "قبلاً ساعت‌ها برای تهیه سوالات وقت می‌گذاشتم. الان با سوال‌ساز هوشمند، در چند دقیقه آزمون آماده
+                    دارم!"
+                </p>
+
+            </div>
+
+            <!-- Testimonial 2 -->
+            <div
+                class="bg-slate-50 dark:bg-slate-800 p-8 rounded-2xl shadow-lg hover:-translate-y-1 hover:shadow-xl transition-all animate-on-scroll">
+                <div class="flex items-center gap-4 mb-4">
+                    <div
+                        class="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold text-lg">
                         ع
                     </div>
-                    <div class="author-info">
-                        <h4>علی رضایی</h4>
-                        <p>دبیر فیزیک - مشهد</p>
+                    <div>
+                        <h4 class="font-bold text-slate-800 dark:text-white">علی رضایی</h4>
+                        <p class="text-sm text-slate-500 dark:text-slate-400">دبیر فیزیک - مشهد</p>
                     </div>
                 </div>
-            </div>
-            <div class="testimonial-card animate-on-scroll">
-                <div class="testimonial-rating"><i class="fas fa-star"></i> <i class="fas fa-star"></i> <i
-                        class="fas fa-star"></i> <i class="fas fa-star"></i> <i class="fas fa-star"></i>
+                <div class="text-yellow-400 text-xl mb-4">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
                 </div>
-                <p class="testimonial-text">"ابزاری عالی برای معلمان! ویرایشگر آنلاین هم که داره خیلی کارآمده. به همه
-                    توصیه می‌کنم."</p>
-                <div class="testimonial-author">
-                    <div class="author-avatar">
+                <p class="text-slate-600 dark:text-slate-300 leading-relaxed mb-6">
+                    "سوالات تولید شده واقعاً با کیفیت و متنوع هستند. دانش‌آموزانم هم از تنوع سوالات راضی‌اند."
+                </p>
+            </div>
+
+            <!-- Testimonial 3 -->
+            <div
+                class="bg-slate-50 dark:bg-slate-800 p-8 rounded-2xl shadow-lg hover:-translate-y-1 hover:shadow-xl transition-all animate-on-scroll">
+                <div class="flex items-center gap-4 mb-4">
+                    <div
+                        class="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold text-lg">
                         ز
                     </div>
-                    <div class="author-info">
-                        <h4>زهرا کریمی</h4>
-                        <p>دبیر شیمی - اصفهان</p>
+                    <div>
+                        <h4 class="font-bold text-slate-800 dark:text-white">زهرا کریمی</h4>
+                        <p class="text-sm text-slate-500 dark:text-slate-400">دبیر شیمی - اصفهان</p>
                     </div>
                 </div>
+                <div class="text-yellow-400 text-xl mb-4">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                </div>
+                <p class="text-slate-600 dark:text-slate-300 leading-relaxed mb-6">
+                    "ابزاری عالی برای معلمان! ویرایشگر آنلاین هم که داره خیلی کارآمده. به همه توصیه می‌کنم."
+                </p>
+
             </div>
         </div>
-    </section><!-- FAQ -->
-    <section class="faq" id="faq">
-        <div class="section-header">
-            <h2 class="section-title">سوالات متداول</h2>
-            <p class="section-subtitle">پاسخ سوالات رایج درباره سوال‌ساز</p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="py-24 px-6 bg-slate-50 dark:bg-slate-900" id="faq">
+        <div class="max-w-3xl mx-auto text-center mb-16">
+            <h2 class="text-3xl md:text-4xl font-extrabold text-slate-800 dark:text-white mb-4">سوالات متداول</h2>
+            <p class="text-lg text-slate-500 dark:text-slate-400">پاسخ سوالات رایج درباره سوال‌ساز</p>
         </div>
-        <div class="faq-container">
-            <div class="faq-item animate-on-scroll">
-                <div class="faq-question"><span>آیا واقعاً رایگان است؟</span> <i class="fas fa-chevron-down"></i>
+
+        <div class="max-w-3xl mx-auto space-y-4">
+            <!-- FAQ 1 -->
+            <div class="faq-item bg-white dark:bg-slate-800 rounded-2xl shadow-md overflow-hidden animate-on-scroll">
+                <div
+                    class="faq-question px-8 py-5 cursor-pointer flex justify-between items-center font-bold text-slate-800 dark:text-white hover:bg-primary/5 transition-all">
+                    <span>آیا واقعاً رایگان است؟</span>
+                    <i class="fas fa-chevron-down text-primary transition-transform"></i>
                 </div>
                 <div class="faq-answer">
-                    <div class="faq-answer-content">
-                        بله! نسخه رایگان به شما امکان تولید 5 سوال در هر آزمون را می‌دهد. برای تعداد بیشتر می‌توانید پلن
+                    <div class="px-8 pb-5 text-slate-600 dark:text-slate-300 leading-relaxed">
+                        بله! نسخه رایگان به شما امکان تولید ۵ سوال در هر آزمون را می‌دهد. برای تعداد بیشتر می‌توانید پلن
                         حرفه‌ای را انتخاب کنید.
                     </div>
                 </div>
             </div>
-            <div class="faq-item animate-on-scroll">
-                <div class="faq-question"><span>چه نوع فایل‌هایی پشتیبانی می‌شود؟</span> <i
-                        class="fas fa-chevron-down"></i>
+
+            <!-- FAQ 2 -->
+            <div class="faq-item bg-white dark:bg-slate-800 rounded-2xl shadow-md overflow-hidden animate-on-scroll">
+                <div
+                    class="faq-question px-8 py-5 cursor-pointer flex justify-between items-center font-bold text-slate-800 dark:text-white hover:bg-primary/5 transition-all">
+                    <span>چه نوع فایل‌هایی پشتیبانی می‌شود؟</span>
+                    <i class="fas fa-chevron-down text-primary transition-transform"></i>
                 </div>
                 <div class="faq-answer">
-                    <div class="faq-answer-content">
-                        در حال حاضر فقط فایل‌های PDF با حداکثر حجم 16 مگابایت پشتیبانی می‌شوند. به زودی فرمت‌های دیگر
+                    <div class="px-8 pb-5 text-slate-600 dark:text-slate-300 leading-relaxed">
+                        در حال حاضر فقط فایل‌های PDF با حداکثر حجم ۱۶ مگابایت پشتیبانی می‌شوند. به زودی فرمت‌های دیگر
                         اضافه خواهند شد.
                     </div>
                 </div>
             </div>
-            <div class="faq-item animate-on-scroll">
-                <div class="faq-question"><span>سوالات چقدر دقیق هستند؟</span> <i class="fas fa-chevron-down"></i>
+
+            <!-- FAQ 3 -->
+            <div class="faq-item bg-white dark:bg-slate-800 rounded-2xl shadow-md overflow-hidden animate-on-scroll">
+                <div
+                    class="faq-question px-8 py-5 cursor-pointer flex justify-between items-center font-bold text-slate-800 dark:text-white hover:bg-primary/5 transition-all">
+                    <span>سوالات چقدر دقیق هستند؟</span>
+                    <i class="fas fa-chevron-down text-primary transition-transform"></i>
                 </div>
                 <div class="faq-answer">
-                    <div class="faq-answer-content">
+                    <div class="px-8 pb-5 text-slate-600 dark:text-slate-300 leading-relaxed">
                         هوش مصنوعی ما با دقت بالا سوالات تولید می‌کند، اما همیشه توصیه می‌کنیم قبل از استفاده نهایی،
                         سوالات را بررسی و در صورت نیاز ویرایش کنید.
                     </div>
                 </div>
             </div>
-            <div class="faq-item animate-on-scroll">
-                <div class="faq-question"><span>آیا فایل‌های من امن هستند؟</span> <i class="fas fa-chevron-down"></i>
+
+            <!-- FAQ 4 -->
+            <div class="faq-item bg-white dark:bg-slate-800 rounded-2xl shadow-md overflow-hidden animate-on-scroll">
+                <div
+                    class="faq-question px-8 py-5 cursor-pointer flex justify-between items-center font-bold text-slate-800 dark:text-white hover:bg-primary/5 transition-all">
+                    <span>آیا فایل‌های من امن هستند؟</span>
+                    <i class="fas fa-chevron-down text-primary transition-transform"></i>
                 </div>
                 <div class="faq-answer">
-                    <div class="faq-answer-content">
-                        بله! فایل های پس از پردازش از سرورهای ما حذف می‌شوند و هیچ نسخه‌ای از آن‌ها
-                        نگهداری نمی‌شود.
+                    <div class="px-8 pb-5 text-slate-600 dark:text-slate-300 leading-relaxed">
+                        بله! فایل‌ها پس از پردازش از سرورهای ما حذف می‌شوند و هیچ نسخه‌ای از آن‌ها نگهداری نمی‌شود.
                     </div>
                 </div>
             </div>
-            <div class="faq-item animate-on-scroll">
-                <div class="faq-question"><span>آیا می‌توانم سوالات را ویرایش کنم؟</span> <i
-                        class="fas fa-chevron-down"></i>
+
+            <!-- FAQ 5 -->
+            <div class="faq-item bg-white dark:bg-slate-800 rounded-2xl shadow-md overflow-hidden animate-on-scroll">
+                <div
+                    class="faq-question px-8 py-5 cursor-pointer flex justify-between items-center font-bold text-slate-800 dark:text-white hover:bg-primary/5 transition-all">
+                    <span>آیا می‌توانم سوالات را ویرایش کنم؟</span>
+                    <i class="fas fa-chevron-down text-primary transition-transform"></i>
                 </div>
                 <div class="faq-answer">
-                    <div class="faq-answer-content">
+                    <div class="px-8 pb-5 text-slate-600 dark:text-slate-300 leading-relaxed">
                         بله! پس از تولید سوالات، به ویرایشگر آنلاین منتقل می‌شوید که می‌توانید سوالات را ویرایش، حذف یا
                         تغییر دهید.
                     </div>
                 </div>
             </div>
         </div>
-    </section><!-- CTA Section -->
-    <section class="cta">
-        <div class="cta-content">
-            <h2>همین الان شروع کنید! 🚀</h2>
-            <p>هزاران معلم به ما اعتماد کرده‌اند. شما هم بپیوندید!</p><a href="/form" class="btn btn-white btn-lg"> <i
-                    class="fas fa-rocket"></i> تولید سوال رایگان </a>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-24 px-6 bg-gradient-to-br from-primary to-secondary relative overflow-hidden">
+        <div class="absolute inset-0 opacity-20 bg-[url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 1440 320\"><path fill=\"rgba(255,255,255,0.05)\" d=\"M0,96L48,112C96,128,192,160,288,165.3C384,171,480,149,576,154.7C672,160,768,192,864,197.3C960,203,1056,181,1152,165.3C1248,149,1344,139,1392,133.3L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z\"></path></svg>
         </div>
-    </section><!-- Footer -->
-    <footer class="footer">
-        <div class="footer-content">
-            <div class="footer-section">
-                <h3><i class="fas fa-brain"></i> سوال‌ساز هوشمند</h3>
-                <p style="color: rgba(255,255,255,0.7); line-height: 1.8;">ابزار هوشمند تولید سوالات آزمون برای معلمان و
-                    اساتید. صرفه‌جویی در وقت، افزایش کیفیت.</p>
+
+        <div class="max-w-4xl
+            mx-auto text-center relative z-10">
+            <h2 class="text-4xl md:text-5xl font-black text-white mb-6">همین الان شروع کنید! 🚀</h2>
+            <p class="text-xl text-white/95 mb-10">هزاران معلم به ما اعتماد کرده‌اند. شما هم بپیوندید!</p>
+            <a href="/form"
+                class="inline-flex items-center gap-3 px-12 py-5 bg-white text-primary font-bold text-xl rounded-xl shadow-xl hover:-translate-y-1 hover:shadow-2xl transition-all">
+                <i class="fas fa-rocket"></i>
+                تولید سوال رایگان
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-white pt-16 pb-8 px-6">
+        <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+            <div>
+                <h3 class="text-xl font-bold mb-6 flex items-center gap-2">
+                    <i class="fas fa-brain"></i>
+                    سوال‌ساز هوشمند
+                </h3>
+                <p class="text-white/70 leading-relaxed">
+                    ابزار هوشمند تولید سوالات آزمون برای معلمان و اساتید. صرفه‌جویی در وقت، افزایش کیفیت.
+                </p>
             </div>
-            <div class="footer-section">
-                <h3>دسترسی سریع</h3>
-                <ul class="footer-links">
-                    <li><a href="#features">ویژگی‌ها</a></li>
-                    <li><a href="#how-it-works">نحوه کار</a></li>
-                    <li><a href="#pricing">قیمت‌ها</a></li>
-                    <li><a href="#faq">سوالات متداول</a></li>
+
+            <div>
+                <h3 class="text-xl font-bold mb-6">دسترسی سریع</h3>
+                <ul class="space-y-3">
+                    <li><a href="#features" class="text-white/70 hover:text-white transition-colors">ویژگی‌ها</a></li>
+                    <li><a href="#how-it-works" class="text-white/70 hover:text-white transition-colors">نحوه کار</a>
+                    </li>
+                    <li><a href="#pricing" class="text-white/70 hover:text-white transition-colors">قیمت‌ها</a></li>
+                    <li><a href="#faq" class="text-white/70 hover:text-white transition-colors">سوالات متداول</a>
+                    </li>
                 </ul>
             </div>
-            <div class="footer-section">
-                <h3>پشتیبانی</h3>
-                <ul class="footer-links">
-                    <li><a href="#">راهنما</a></li>
-                    <li><a href="#">تماس با ما</a></li>
-                    <li><a href="#">گزارش مشکل</a></li>
-                    <li><a href="#">درخواست ویژگی</a></li>
+
+            <div>
+                <h3 class="text-xl font-bold mb-6">پشتیبانی</h3>
+                <ul class="space-y-3">
+                    <li><a href="#" class="text-white/70 hover:text-white transition-colors">راهنما</a></li>
+                    <li><a href="#" class="text-white/70 hover:text-white transition-colors">تماس با ما</a></li>
+                    <li><a href="#" class="text-white/70 hover:text-white transition-colors">گزارش مشکل</a></li>
+                    <li><a href="#" class="text-white/70 hover:text-white transition-colors">درخواست ویژگی</a>
+                    </li>
                 </ul>
             </div>
-            <div class="footer-section">
-                <h3>قوانین</h3>
-                <ul class="footer-links">
-                    <li><a href="#">حریم خصوصی</a></li>
-                    <li><a href="#">شرایط استفاده</a></li>
-                    <li><a href="#">سیاست بازپرداخت</a></li>
+
+            <div>
+                <h3 class="text-xl font-bold mb-6">قوانین</h3>
+                <ul class="space-y-3">
+                    <li><a href="#" class="text-white/70 hover:text-white transition-colors">حریم خصوصی</a></li>
+                    <li><a href="#" class="text-white/70 hover:text-white transition-colors">شرایط استفاده</a>
+                    </li>
+                    <li><a href="#" class="text-white/70 hover:text-white transition-colors">سیاست بازپرداخت</a>
+                    </li>
                 </ul>
             </div>
         </div>
-        <div class="footer-bottom">
-            <p>© 2024 سوال‌ساز هوشمند. تمامی حقوق محفوظ است.</p>
+
+        <div class="max-w-6xl mx-auto border-t border-white/10 pt-8 text-center text-white/70">
+            <p>© ۲۰۲۴ سوال‌ساز هوشمند. تمامی حقوق محفوظ است.</p>
         </div>
     </footer>
-    <script src="{{ asset('asset/js/dark-mode.js') }}"></script>
+    <script src="{{ asset('asset/js/dark-tailwind.js') }}"></script>
 
     <script>
-
-
-        // Header Scroll Effect
-        const header = document.querySelector('.header');
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 50) {
-                header.classList.add('scrolled');
-            } else {
-                header.classList.remove('scrolled');
-            }
-        });
 
         // Scroll Animation
         const animateOnScroll = () => {
@@ -1260,13 +756,11 @@
             elements.forEach(element => {
                 const elementTop = element.getBoundingClientRect().top;
                 const windowHeight = window.innerHeight;
-
                 if (elementTop < windowHeight - 100) {
                     element.classList.add('animated');
                 }
             });
         };
-
         window.addEventListener('scroll', animateOnScroll);
         animateOnScroll();
 
@@ -1276,9 +770,7 @@
             const question = item.querySelector('.faq-question');
             question.addEventListener('click', () => {
                 const isActive = item.classList.contains('active');
-
                 faqItems.forEach(i => i.classList.remove('active'));
-
                 if (!isActive) {
                     item.classList.add('active');
                 }
@@ -1287,7 +779,7 @@
 
         // Smooth Scroll for Links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
+            anchor.addEventListener('click', function(e) {
                 e.preventDefault();
                 const target = document.querySelector(this.getAttribute('href'));
                 if (target) {
@@ -1299,7 +791,6 @@
             });
         });
     </script>
-    <script>(function () { function c() { var b = a.contentDocument || a.contentWindow.document; if (b) { var d = b.createElement('script'); d.innerHTML = "window.__CF$cv$params={r:'9a503ab4630ad949',t:'MTc2NDIzMTg2Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);"; b.getElementsByTagName('head')[0].appendChild(d) } } if (document.body) { var a = document.createElement('iframe'); a.height = 1; a.width = 1; a.style.position = 'absolute'; a.style.top = 0; a.style.left = 0; a.style.border = 'none'; a.style.visibility = 'hidden'; document.body.appendChild(a); if ('loading' !== document.readyState) c(); else if (window.addEventListener) document.addEventListener('DOMContentLoaded', c); else { var e = document.onreadystatechange || function () { }; document.onreadystatechange = function (b) { e(b); 'loading' !== document.readyState && (document.onreadystatechange = e, c()) } } } })();</script>
 </body>
 
 </html>

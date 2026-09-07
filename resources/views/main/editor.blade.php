@@ -2,6 +2,7 @@
 <html lang="fa" dir="rtl">
 
 <head>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>فرم ساز حرفه‌ای</title>
@@ -1715,6 +1716,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100;200;300;400;500;600;700;800;900&display=swap"
         rel="stylesheet">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
 <body>
@@ -1814,7 +1816,7 @@
             </aside>
             <script>
                 // منوی باز و بسته شونده موبایل
-                document.addEventListener('DOMContentLoaded', function () {
+                document.addEventListener('DOMContentLoaded', function() {
                     var sidebarBtn = document.getElementById('toggleSidebarBtn');
                     var sidebarContent = document.getElementById('sidebarContent');
                     var propertiesBtn = document.getElementById('togglePropertiesBtn');
@@ -1822,15 +1824,16 @@
 
                     function toggleMenu(content, btn) {
                         if (window.innerWidth <= 900) {
-                            content.style.display = (content.style.display === 'none' || !content.style.display) ? 'block' : 'none';
+                            content.style.display = (content.style.display === 'none' || !content.style.display) ? 'block' :
+                                'none';
                             btn.classList.toggle('active');
                         }
                     }
 
-                    sidebarBtn.addEventListener('click', function () {
+                    sidebarBtn.addEventListener('click', function() {
                         toggleMenu(sidebarContent, sidebarBtn);
                     });
-                    propertiesBtn.addEventListener('click', function () {
+                    propertiesBtn.addEventListener('click', function() {
                         toggleMenu(propertiesContent, propertiesBtn);
                     });
 
@@ -1981,7 +1984,8 @@
         </div>
     </div>
 
-    <script>// فرم ساز حرفه‌ای - اسکریپت اصلی
+    <script>
+        // فرم ساز حرفه‌ای - اسکریپت اصلی
         class FormBuilder {
             constructor() {
                 this.canvas = document.getElementById('formCanvas');
@@ -1989,7 +1993,11 @@
                 this.fieldCounter = 0;
                 this.selectedElement = null;
                 this.formData = [];
-                this.steps = [{ id: 1, title: 'مرحله ۱', fields: [] }];
+                this.steps = [{
+                    id: 1,
+                    title: 'مرحله ۱',
+                    fields: []
+                }];
                 this.currentStep = 1;
                 this.conditions = [];
                 this.multiStepMode = false;
@@ -2023,7 +2031,8 @@
                 document.getElementById('responsiveMode').addEventListener('click', () => this.toggleResponsiveMode());
 
                 // Search Fields
-                document.getElementById('searchFields').addEventListener('input', (e) => this.searchFields(e.target.value));
+                document.getElementById('searchFields').addEventListener('input', (e) => this.searchFields(e.target
+                    .value));
 
                 // Keyboard Shortcuts
                 document.addEventListener('keydown', (e) => this.handleKeyboardShortcuts(e));
@@ -2103,7 +2112,8 @@
             toggleTheme() {
                 document.body.classList.toggle('dark-mode');
                 const isDark = document.body.classList.contains('dark-mode');
-                document.getElementById('themeToggle').innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+                document.getElementById('themeToggle').innerHTML = isDark ? '<i class="fas fa-sun"></i>' :
+                    '<i class="fas fa-moon"></i>';
                 localStorage.setItem('formBuilderTheme', isDark ? 'dark' : 'light');
                 this.showNotification(isDark ? 'حالت تاریک فعال شد' : 'حالت روشن فعال شد', 'info');
             }
@@ -2113,7 +2123,8 @@
                 this.canvas.classList.toggle('show-grid');
                 const btn = document.getElementById('gridToggle');
                 btn.classList.toggle('active');
-                this.showNotification(this.canvas.classList.contains('show-grid') ? 'شبکه فعال شد' : 'شبکه غیرفعال شد', 'info');
+                this.showNotification(this.canvas.classList.contains('show-grid') ? 'شبکه فعال شد' : 'شبکه غیرفعال شد',
+                    'info');
             }
 
             // Toggle Responsive Mode
@@ -2264,7 +2275,10 @@
                     const observer = new MutationObserver(() => {
                         attachDragListeners();
                     });
-                    observer.observe(sidebarContainer, { childList: true, subtree: true });
+                    observer.observe(sidebarContainer, {
+                        childList: true,
+                        subtree: true
+                    });
                 }
 
                 this.canvas.addEventListener('dragover', (e) => {
@@ -2411,9 +2425,14 @@
                     case 'select':
                     case 'radio':
                     case 'checkbox':
-                        baseData.options = [
-                            { value: 'option1', label: 'گزینه ۱' },
-                            { value: 'option2', label: 'گزینه ۲' }
+                        baseData.options = [{
+                                value: 'option1',
+                                label: 'گزینه ۱'
+                            },
+                            {
+                                value: 'option2',
+                                label: 'گزینه ۲'
+                            }
                         ];
                         break;
                     case 'number':
@@ -2527,27 +2546,106 @@
                 const itemsContainer = modal.querySelector('.field-items-modal');
 
                 // لیست انواع فیلدها (همان sidebar)
-                const fieldTypes = [
-                    { type: 'text', icon: 'fas fa-font', label: 'فیلد متنی' },
-                    { type: 'email', icon: 'fas fa-envelope', label: 'ایمیل' },
-                    { type: 'number', icon: 'fas fa-hashtag', label: 'عدد' },
-                    { type: 'tel', icon: 'fas fa-phone', label: 'تلفن' },
-                    { type: 'password', icon: 'fas fa-lock', label: 'رمز عبور' },
-                    { type: 'textarea', icon: 'fas fa-align-left', label: 'متن چندخطی' },
-                    { type: 'select', icon: 'fas fa-list', label: 'لیست کشویی' },
-                    { type: 'checkbox', icon: 'fas fa-check-square', label: 'چک باکس' },
-                    { type: 'radio', icon: 'fas fa-dot-circle', label: 'رادیو باتن' },
-                    { type: 'file', icon: 'fas fa-file-upload', label: 'آپلود فایل' },
-                    { type: 'date', icon: 'fas fa-calendar', label: 'تاریخ' },
-                    { type: 'range', icon: 'fas fa-sliders-h', label: 'محدوده' },
-                    { type: 'datetime-local', icon: 'fas fa-clock', label: 'تاریخ و زمان' },
-                    { type: 'color', icon: 'fas fa-palette', label: 'انتخاب رنگ' },
-                    { type: 'url', icon: 'fas fa-link', label: 'آدرس وب' },
-                    { type: 'search', icon: 'fas fa-search', label: 'جستجو' },
-                    { type: 'hidden', icon: 'fas fa-eye-slash', label: 'فیلد مخفی' },
-                    { type: 'heading', icon: 'fas fa-heading', label: 'عنوان' },
-                    { type: 'paragraph', icon: 'fas fa-paragraph', label: 'متن توضیحی' },
-                    { type: 'divider', icon: 'fas fa-minus', label: 'خط جداکننده' }
+                const fieldTypes = [{
+                        type: 'text',
+                        icon: 'fas fa-font',
+                        label: 'فیلد متنی'
+                    },
+                    {
+                        type: 'email',
+                        icon: 'fas fa-envelope',
+                        label: 'ایمیل'
+                    },
+                    {
+                        type: 'number',
+                        icon: 'fas fa-hashtag',
+                        label: 'عدد'
+                    },
+                    {
+                        type: 'tel',
+                        icon: 'fas fa-phone',
+                        label: 'تلفن'
+                    },
+                    {
+                        type: 'password',
+                        icon: 'fas fa-lock',
+                        label: 'رمز عبور'
+                    },
+                    {
+                        type: 'textarea',
+                        icon: 'fas fa-align-left',
+                        label: 'متن چندخطی'
+                    },
+                    {
+                        type: 'select',
+                        icon: 'fas fa-list',
+                        label: 'لیست کشویی'
+                    },
+                    {
+                        type: 'checkbox',
+                        icon: 'fas fa-check-square',
+                        label: 'چک باکس'
+                    },
+                    {
+                        type: 'radio',
+                        icon: 'fas fa-dot-circle',
+                        label: 'رادیو باتن'
+                    },
+                    {
+                        type: 'file',
+                        icon: 'fas fa-file-upload',
+                        label: 'آپلود فایل'
+                    },
+                    {
+                        type: 'date',
+                        icon: 'fas fa-calendar',
+                        label: 'تاریخ'
+                    },
+                    {
+                        type: 'range',
+                        icon: 'fas fa-sliders-h',
+                        label: 'محدوده'
+                    },
+                    {
+                        type: 'datetime-local',
+                        icon: 'fas fa-clock',
+                        label: 'تاریخ و زمان'
+                    },
+                    {
+                        type: 'color',
+                        icon: 'fas fa-palette',
+                        label: 'انتخاب رنگ'
+                    },
+                    {
+                        type: 'url',
+                        icon: 'fas fa-link',
+                        label: 'آدرس وب'
+                    },
+                    {
+                        type: 'search',
+                        icon: 'fas fa-search',
+                        label: 'جستجو'
+                    },
+                    {
+                        type: 'hidden',
+                        icon: 'fas fa-eye-slash',
+                        label: 'فیلد مخفی'
+                    },
+                    {
+                        type: 'heading',
+                        icon: 'fas fa-heading',
+                        label: 'عنوان'
+                    },
+                    {
+                        type: 'paragraph',
+                        icon: 'fas fa-paragraph',
+                        label: 'متن توضیحی'
+                    },
+                    {
+                        type: 'divider',
+                        icon: 'fas fa-minus',
+                        label: 'خط جداکننده'
+                    }
                 ];
 
                 // پاک‌سازی و ساخت گزینه‌ها
@@ -2719,7 +2817,8 @@
 
                 switch (fieldData.type) {
                     case 'textarea':
-                        html += `<textarea class="form-control" placeholder="${fieldData.placeholder}" ${fieldData.required ? 'required' : ''}></textarea>`;
+                        html +=
+                            `<textarea class="form-control" placeholder="${fieldData.placeholder}" ${fieldData.required ? 'required' : ''}></textarea>`;
                         break;
 
                     case 'select':
@@ -2767,11 +2866,14 @@
                     default:
                         // فیلدهای خاص
                         if (fieldData.type === 'heading') {
-                            html += `<h3 style="color: #2d3748; margin: 0;">${fieldData.placeholder || fieldData.label}</h3>`;
+                            html +=
+                                `<h3 style="color: #2d3748; margin: 0;">${fieldData.placeholder || fieldData.label}</h3>`;
                         } else if (fieldData.type === 'paragraph') {
-                            html += `<p style="color: #718096; margin: 0; line-height: 1.6;">${fieldData.placeholder || 'متن توضیحی در اینجا قرار می‌گیرد.'}</p>`;
+                            html +=
+                                `<p style="color: #718096; margin: 0; line-height: 1.6;">${fieldData.placeholder || 'متن توضیحی در اینجا قرار می‌گیرد.'}</p>`;
                         } else if (fieldData.type === 'divider') {
-                            html += `<hr style="border: none; height: 2px; background: linear-gradient(to right, #e2e8f0, #cbd5e0, #e2e8f0); margin: 1rem 0;">`;
+                            html +=
+                                `<hr style="border: none; height: 2px; background: linear-gradient(to right, #e2e8f0, #cbd5e0, #e2e8f0); margin: 1rem 0;">`;
                         } else {
                             // فیلدهای معمولی
                             const inputAttrs = [];
@@ -2956,7 +3058,8 @@
                 // تغییر ویژگی‌های کلی
                 this.propertiesContent.querySelectorAll('.property-input').forEach(input => {
                     input.addEventListener('input', (e) => {
-                        this.updateFieldProperty(fieldData, e.target.dataset.property, e.target.type === 'checkbox' ? e.target.checked : e.target.value);
+                        this.updateFieldProperty(fieldData, e.target.dataset.property, e.target.type ===
+                            'checkbox' ? e.target.checked : e.target.value);
                     });
                 });
 
@@ -3079,8 +3182,9 @@
 
                 if (fieldIndex > 0) {
                     // جابجایی در آرایه داده‌ها
-                    [this.formData[fieldIndex], this.formData[fieldIndex - 1]] =
-                        [this.formData[fieldIndex - 1], this.formData[fieldIndex]];
+                    [this.formData[fieldIndex], this.formData[fieldIndex - 1]] = [this.formData[fieldIndex - 1], this
+                        .formData[fieldIndex]
+                    ];
 
                     // بازسازی نمایش
                     this.renderForm();
@@ -3093,8 +3197,9 @@
 
                 if (fieldIndex < this.formData.length - 1) {
                     // جابجایی در آرایه داده‌ها
-                    [this.formData[fieldIndex], this.formData[fieldIndex + 1]] =
-                        [this.formData[fieldIndex + 1], this.formData[fieldIndex]];
+                    [this.formData[fieldIndex], this.formData[fieldIndex + 1]] = [this.formData[fieldIndex + 1], this
+                        .formData[fieldIndex]
+                    ];
 
                     // بازسازی نمایش
                     this.renderForm();
@@ -3168,11 +3273,13 @@
 
                 switch (fieldData.type) {
                     case 'textarea':
-                        html += `<textarea class="form-control" name="${fieldData.name}" placeholder="${fieldData.placeholder}" ${fieldData.required ? 'required' : ''}></textarea>`;
+                        html +=
+                            `<textarea class="form-control" name="${fieldData.name}" placeholder="${fieldData.placeholder}" ${fieldData.required ? 'required' : ''}></textarea>`;
                         break;
 
                     case 'select':
-                        html += `<select class="form-control" name="${fieldData.name}" ${fieldData.required ? 'required' : ''}>`;
+                        html +=
+                            `<select class="form-control" name="${fieldData.name}" ${fieldData.required ? 'required' : ''}>`;
                         if (fieldData.placeholder) {
                             html += `<option value="">${fieldData.placeholder}</option>`;
                         }
@@ -3216,11 +3323,14 @@
                     default:
                         // فیلدهای خاص
                         if (fieldData.type === 'heading') {
-                            html += `<h3 style="color: #2d3748; margin: 0;">${fieldData.placeholder || fieldData.label}</h3>`;
+                            html +=
+                                `<h3 style="color: #2d3748; margin: 0;">${fieldData.placeholder || fieldData.label}</h3>`;
                         } else if (fieldData.type === 'paragraph') {
-                            html += `<p style="color: #718096; margin: 0; line-height: 1.6;">${fieldData.placeholder || 'متن توضیحی در اینجا قرار می‌گیرد.'}</p>`;
+                            html +=
+                                `<p style="color: #718096; margin: 0; line-height: 1.6;">${fieldData.placeholder || 'متن توضیحی در اینجا قرار می‌گیرد.'}</p>`;
                         } else if (fieldData.type === 'divider') {
-                            html += `<hr style="border: none; height: 2px; background: linear-gradient(to right, #e2e8f0, #cbd5e0, #e2e8f0); margin: 1rem 0;">`;
+                            html +=
+                                `<hr style="border: none; height: 2px; background: linear-gradient(to right, #e2e8f0, #cbd5e0, #e2e8f0); margin: 1rem 0;">`;
                         } else {
                             // فیلدهای معمولی
                             const inputAttrs = [];
@@ -3267,19 +3377,24 @@
 
                         // بررسی validation rules
                         if (value && field.validation) {
-                            if (field.validation.minLength && value.length < parseInt(field.validation.minLength)) {
+                            if (field.validation.minLength && value.length < parseInt(field.validation
+                                    .minLength)) {
                                 isValid = false;
-                                this.showValidationError(field.name, `حداقل ${field.validation.minLength} کاراکتر وارد کنید`);
+                                this.showValidationError(field.name,
+                                    `حداقل ${field.validation.minLength} کاراکتر وارد کنید`);
                                 return;
                             }
 
-                            if (field.validation.maxLength && value.length > parseInt(field.validation.maxLength)) {
+                            if (field.validation.maxLength && value.length > parseInt(field.validation
+                                    .maxLength)) {
                                 isValid = false;
-                                this.showValidationError(field.name, `حداکثر ${field.validation.maxLength} کاراکتر مجاز است`);
+                                this.showValidationError(field.name,
+                                    `حداکثر ${field.validation.maxLength} کاراکتر مجاز است`);
                                 return;
                             }
 
-                            if (field.validation.pattern && !new RegExp(field.validation.pattern).test(value)) {
+                            if (field.validation.pattern && !new RegExp(field.validation.pattern).test(
+                                    value)) {
                                 isValid = false;
                                 this.showValidationError(field.name, 'فرمت وارد شده صحیح نیست');
                                 return;
@@ -3290,7 +3405,8 @@
                     });
 
                     if (isValid) {
-                        alert('فرم با موفقیت ارسال شد!\n\nداده‌های ارسالی:\n' + JSON.stringify(results, null, 2));
+                        alert('فرم با موفقیت ارسال شد!\n\nداده‌های ارسالی:\n' + JSON.stringify(results, null,
+                            2));
                     }
                 });
             }
@@ -3314,7 +3430,9 @@
                     field.addEventListener('input', () => {
                         field.classList.remove('invalid');
                         errorElement.style.display = 'none';
-                    }, { once: true });
+                    }, {
+                        once: true
+                    });
                 }
             }
 
@@ -3369,7 +3487,9 @@
                             }, 500);
                         };
 
-                        this.showNotification('✅ HTML آزمون آماده پرینت است! از منوی پرینت مرورگر، "Save as PDF" را انتخاب کنید.', 'success');
+                        this.showNotification(
+                            '✅ HTML آزمون آماده پرینت است! از منوی پرینت مرورگر، "Save as PDF" را انتخاب کنید.',
+                            'success');
                     } else {
                         // در صورت خطا، سعی کن JSON بخوانیم
                         const errorText = await response.text();
@@ -3584,26 +3704,63 @@
 
             // دریافت قالب‌های آماده
             getTemplates() {
-                return [
-                    {
+                return [{
                         id: 'contact',
                         name: 'فرم تماس',
                         description: 'فرم ساده برای تماس با شما شامل نام، ایمیل، تلفن و پیام',
                         icon: 'fas fa-envelope',
-                        fields: [
-                            { type: 'heading', label: 'تماس با ما', placeholder: 'تماس با ما' },
-                            { type: 'paragraph', label: 'توضیحات', placeholder: 'لطفاً اطلاعات خود را جهت تماس وارد کنید.' },
-                            { type: 'text', label: 'نام و نام خانوادگی', placeholder: 'نام کامل خود را وارد کنید', required: true },
-                            { type: 'email', label: 'آدرس ایمیل', placeholder: 'example@domain.com', required: true },
-                            { type: 'tel', label: 'شماره تلفن', placeholder: '09123456789', required: true },
-                            {
-                                type: 'select', label: 'موضوع تماس', options: [
-                                    { value: 'support', label: 'پشتیبانی' },
-                                    { value: 'sales', label: 'فروش' },
-                                    { value: 'general', label: 'عمومی' }
-                                ], required: true
+                        fields: [{
+                                type: 'heading',
+                                label: 'تماس با ما',
+                                placeholder: 'تماس با ما'
                             },
-                            { type: 'textarea', label: 'پیام شما', placeholder: 'متن پیام خود را اینجا بنویسید...', required: true }
+                            {
+                                type: 'paragraph',
+                                label: 'توضیحات',
+                                placeholder: 'لطفاً اطلاعات خود را جهت تماس وارد کنید.'
+                            },
+                            {
+                                type: 'text',
+                                label: 'نام و نام خانوادگی',
+                                placeholder: 'نام کامل خود را وارد کنید',
+                                required: true
+                            },
+                            {
+                                type: 'email',
+                                label: 'آدرس ایمیل',
+                                placeholder: 'example@domain.com',
+                                required: true
+                            },
+                            {
+                                type: 'tel',
+                                label: 'شماره تلفن',
+                                placeholder: '09123456789',
+                                required: true
+                            },
+                            {
+                                type: 'select',
+                                label: 'موضوع تماس',
+                                options: [{
+                                        value: 'support',
+                                        label: 'پشتیبانی'
+                                    },
+                                    {
+                                        value: 'sales',
+                                        label: 'فروش'
+                                    },
+                                    {
+                                        value: 'general',
+                                        label: 'عمومی'
+                                    }
+                                ],
+                                required: true
+                            },
+                            {
+                                type: 'textarea',
+                                label: 'پیام شما',
+                                placeholder: 'متن پیام خود را اینجا بنویسید...',
+                                required: true
+                            }
                         ]
                     },
                     {
@@ -3611,23 +3768,75 @@
                         name: 'فرم ثبت‌نام',
                         description: 'فرم کاملی برای ثبت‌نام کاربران شامل اطلاعات شخصی و حساب کاربری',
                         icon: 'fas fa-user-plus',
-                        fields: [
-                            { type: 'heading', label: 'ثبت‌نام', placeholder: 'ایجاد حساب کاربری جدید' },
-                            { type: 'divider' },
-                            { type: 'text', label: 'نام', placeholder: 'نام خود را وارد کنید', required: true },
-                            { type: 'text', label: 'نام خانوادگی', placeholder: 'نام خانوادگی خود را وارد کنید', required: true },
-                            { type: 'email', label: 'آدرس ایمیل', placeholder: 'ایمیل معتبر وارد کنید', required: true },
-                            { type: 'password', label: 'رمز عبور', placeholder: 'حداقل ۸ کاراکتر', required: true },
-                            { type: 'password', label: 'تکرار رمز عبور', placeholder: 'رمز عبور را مجدداً وارد کنید', required: true },
-                            { type: 'tel', label: 'شماره موبایل', placeholder: '09123456789', required: true },
-                            { type: 'date', label: 'تاریخ تولد', required: false },
-                            {
-                                type: 'radio', label: 'جنسیت', options: [
-                                    { value: 'male', label: 'مرد' },
-                                    { value: 'female', label: 'زن' }
-                                ], required: false
+                        fields: [{
+                                type: 'heading',
+                                label: 'ثبت‌نام',
+                                placeholder: 'ایجاد حساب کاربری جدید'
                             },
-                            { type: 'checkbox', label: 'شرایط و قوانین', placeholder: 'قوانین و مقررات را می‌پذیرم', required: true }
+                            {
+                                type: 'divider'
+                            },
+                            {
+                                type: 'text',
+                                label: 'نام',
+                                placeholder: 'نام خود را وارد کنید',
+                                required: true
+                            },
+                            {
+                                type: 'text',
+                                label: 'نام خانوادگی',
+                                placeholder: 'نام خانوادگی خود را وارد کنید',
+                                required: true
+                            },
+                            {
+                                type: 'email',
+                                label: 'آدرس ایمیل',
+                                placeholder: 'ایمیل معتبر وارد کنید',
+                                required: true
+                            },
+                            {
+                                type: 'password',
+                                label: 'رمز عبور',
+                                placeholder: 'حداقل ۸ کاراکتر',
+                                required: true
+                            },
+                            {
+                                type: 'password',
+                                label: 'تکرار رمز عبور',
+                                placeholder: 'رمز عبور را مجدداً وارد کنید',
+                                required: true
+                            },
+                            {
+                                type: 'tel',
+                                label: 'شماره موبایل',
+                                placeholder: '09123456789',
+                                required: true
+                            },
+                            {
+                                type: 'date',
+                                label: 'تاریخ تولد',
+                                required: false
+                            },
+                            {
+                                type: 'radio',
+                                label: 'جنسیت',
+                                options: [{
+                                        value: 'male',
+                                        label: 'مرد'
+                                    },
+                                    {
+                                        value: 'female',
+                                        label: 'زن'
+                                    }
+                                ],
+                                required: false
+                            },
+                            {
+                                type: 'checkbox',
+                                label: 'شرایط و قوانین',
+                                placeholder: 'قوانین و مقررات را می‌پذیرم',
+                                required: true
+                            }
                         ]
                     },
                     {
@@ -3635,29 +3844,85 @@
                         name: 'فرم نظرسنجی',
                         description: 'قالب نظرسنجی برای جمع‌آوری نظرات و بازخوردهای کاربران',
                         icon: 'fas fa-poll',
-                        fields: [
-                            { type: 'heading', label: 'نظرسنجی', placeholder: 'نظر شما برای ما مهم است' },
-                            { type: 'paragraph', label: 'توضیحات', placeholder: 'لطفاً چند دقیقه از وقت خود را صرف پاسخ به این سوالات کنید.' },
-                            { type: 'text', label: 'نام (اختیاری)', placeholder: 'نام خود را وارد کنید', required: false },
-                            { type: 'email', label: 'ایمیل (اختیاری)', placeholder: 'example@domain.com', required: false },
-                            { type: 'range', label: 'میزان رضایت کلی', min: '1', max: '10', step: '1' },
-                            {
-                                type: 'radio', label: 'چگونه ما را شناختید؟', options: [
-                                    { value: 'search', label: 'موتورهای جستجو' },
-                                    { value: 'social', label: 'شبکه‌های اجتماعی' },
-                                    { value: 'friend', label: 'معرفی دوستان' },
-                                    { value: 'ads', label: 'تبلیغات' }
-                                ], required: true
+                        fields: [{
+                                type: 'heading',
+                                label: 'نظرسنجی',
+                                placeholder: 'نظر شما برای ما مهم است'
                             },
                             {
-                                type: 'checkbox', label: 'خدمات مورد استفاده', options: [
-                                    { value: 'product1', label: 'محصول ۱' },
-                                    { value: 'product2', label: 'محصول ۲' },
-                                    { value: 'product3', label: 'محصول ۳' },
-                                    { value: 'support', label: 'پشتیبانی' }
-                                ], required: false
+                                type: 'paragraph',
+                                label: 'توضیحات',
+                                placeholder: 'لطفاً چند دقیقه از وقت خود را صرف پاسخ به این سوالات کنید.'
                             },
-                            { type: 'textarea', label: 'پیشنهادات و انتقادات', placeholder: 'نظرات خود را اینجا بنویسید...', required: false }
+                            {
+                                type: 'text',
+                                label: 'نام (اختیاری)',
+                                placeholder: 'نام خود را وارد کنید',
+                                required: false
+                            },
+                            {
+                                type: 'email',
+                                label: 'ایمیل (اختیاری)',
+                                placeholder: 'example@domain.com',
+                                required: false
+                            },
+                            {
+                                type: 'range',
+                                label: 'میزان رضایت کلی',
+                                min: '1',
+                                max: '10',
+                                step: '1'
+                            },
+                            {
+                                type: 'radio',
+                                label: 'چگونه ما را شناختید؟',
+                                options: [{
+                                        value: 'search',
+                                        label: 'موتورهای جستجو'
+                                    },
+                                    {
+                                        value: 'social',
+                                        label: 'شبکه‌های اجتماعی'
+                                    },
+                                    {
+                                        value: 'friend',
+                                        label: 'معرفی دوستان'
+                                    },
+                                    {
+                                        value: 'ads',
+                                        label: 'تبلیغات'
+                                    }
+                                ],
+                                required: true
+                            },
+                            {
+                                type: 'checkbox',
+                                label: 'خدمات مورد استفاده',
+                                options: [{
+                                        value: 'product1',
+                                        label: 'محصول ۱'
+                                    },
+                                    {
+                                        value: 'product2',
+                                        label: 'محصول ۲'
+                                    },
+                                    {
+                                        value: 'product3',
+                                        label: 'محصول ۳'
+                                    },
+                                    {
+                                        value: 'support',
+                                        label: 'پشتیبانی'
+                                    }
+                                ],
+                                required: false
+                            },
+                            {
+                                type: 'textarea',
+                                label: 'پیشنهادات و انتقادات',
+                                placeholder: 'نظرات خود را اینجا بنویسید...',
+                                required: false
+                            }
                         ]
                     },
                     {
@@ -3665,36 +3930,104 @@
                         name: 'فرم سفارش',
                         description: 'فرم سفارش آنلاین برای فروشگاه‌های اینترنتی',
                         icon: 'fas fa-shopping-cart',
-                        fields: [
-                            { type: 'heading', label: 'فرم سفارش', placeholder: 'اطلاعات سفارش خود را وارد کنید' },
-                            { type: 'divider' },
-                            { type: 'text', label: 'نام و نام خانوادگی', placeholder: 'نام کامل', required: true },
-                            { type: 'tel', label: 'شماره تماس', placeholder: '09123456789', required: true },
-                            { type: 'email', label: 'ایمیل', placeholder: 'example@domain.com', required: true },
-                            { type: 'textarea', label: 'آدرس کامل', placeholder: 'آدرس دقیق برای ارسال...', required: true },
-                            { type: 'text', label: 'کد پستی', placeholder: '1234567890', required: true },
-                            {
-                                type: 'select', label: 'شهر', options: [
-                                    { value: 'tehran', label: 'تهران' },
-                                    { value: 'isfahan', label: 'اصفهان' },
-                                    { value: 'shiraz', label: 'شیراز' },
-                                    { value: 'mashhad', label: 'مشهد' },
-                                    { value: 'other', label: 'سایر شهرها' }
-                                ], required: true
+                        fields: [{
+                                type: 'heading',
+                                label: 'فرم سفارش',
+                                placeholder: 'اطلاعات سفارش خود را وارد کنید'
                             },
                             {
-                                type: 'radio', label: 'روش ارسال', options: [
-                                    { value: 'normal', label: 'ارسال عادی (۳-۵ روز کاری)' },
-                                    { value: 'express', label: 'ارسال فوری (۱-۲ روز کاری)' }
-                                ], required: true
+                                type: 'divider'
                             },
                             {
-                                type: 'radio', label: 'روش پرداخت', options: [
-                                    { value: 'online', label: 'پرداخت آنلاین' },
-                                    { value: 'cash', label: 'پرداخت در محل' }
-                                ], required: true
+                                type: 'text',
+                                label: 'نام و نام خانوادگی',
+                                placeholder: 'نام کامل',
+                                required: true
                             },
-                            { type: 'textarea', label: 'توضیحات اضافی', placeholder: 'توضیحات تکمیلی درباره سفارش...', required: false }
+                            {
+                                type: 'tel',
+                                label: 'شماره تماس',
+                                placeholder: '09123456789',
+                                required: true
+                            },
+                            {
+                                type: 'email',
+                                label: 'ایمیل',
+                                placeholder: 'example@domain.com',
+                                required: true
+                            },
+                            {
+                                type: 'textarea',
+                                label: 'آدرس کامل',
+                                placeholder: 'آدرس دقیق برای ارسال...',
+                                required: true
+                            },
+                            {
+                                type: 'text',
+                                label: 'کد پستی',
+                                placeholder: '1234567890',
+                                required: true
+                            },
+                            {
+                                type: 'select',
+                                label: 'شهر',
+                                options: [{
+                                        value: 'tehran',
+                                        label: 'تهران'
+                                    },
+                                    {
+                                        value: 'isfahan',
+                                        label: 'اصفهان'
+                                    },
+                                    {
+                                        value: 'shiraz',
+                                        label: 'شیراز'
+                                    },
+                                    {
+                                        value: 'mashhad',
+                                        label: 'مشهد'
+                                    },
+                                    {
+                                        value: 'other',
+                                        label: 'سایر شهرها'
+                                    }
+                                ],
+                                required: true
+                            },
+                            {
+                                type: 'radio',
+                                label: 'روش ارسال',
+                                options: [{
+                                        value: 'normal',
+                                        label: 'ارسال عادی (۳-۵ روز کاری)'
+                                    },
+                                    {
+                                        value: 'express',
+                                        label: 'ارسال فوری (۱-۲ روز کاری)'
+                                    }
+                                ],
+                                required: true
+                            },
+                            {
+                                type: 'radio',
+                                label: 'روش پرداخت',
+                                options: [{
+                                        value: 'online',
+                                        label: 'پرداخت آنلاین'
+                                    },
+                                    {
+                                        value: 'cash',
+                                        label: 'پرداخت در محل'
+                                    }
+                                ],
+                                required: true
+                            },
+                            {
+                                type: 'textarea',
+                                label: 'توضیحات اضافی',
+                                placeholder: 'توضیحات تکمیلی درباره سفارش...',
+                                required: false
+                            }
                         ]
                     }
                 ];
@@ -4091,7 +4424,9 @@
 
             // دانلود فایل
             downloadFile(filename, content, mimeType) {
-                const blob = new Blob([content], { type: mimeType });
+                const blob = new Blob([content], {
+                    type: mimeType
+                });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
@@ -4143,7 +4478,8 @@
                         formBuilder.saveToHistory();
 
                         console.log(`✅ ${formBuilder.formData.length} سوال با موفقیت بارگذاری شد`);
-                        formBuilder.showNotification(`✅ ${formBuilder.formData.length} سوال بارگذاری شد`, 'success');
+                        formBuilder.showNotification(`✅ ${formBuilder.formData.length} سوال بارگذاری شد`,
+                            'success');
                     }
                     // اگر فرمت قدیمی (SavedForms) باشه
                     else if (data.data && Array.isArray(data.data)) {
