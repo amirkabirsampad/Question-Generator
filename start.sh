@@ -10,8 +10,13 @@ mkdir -p bootstrap/cache
 touch database/database.sqlite
 rm -f public/hot
 
+# اول config را clear کن (به دیتابیس نیاز نداره)
 php artisan config:clear
-php artisan cache:clear
+
+# بعد migrate کن (جداول ساخته میشن)
 php artisan migrate --force
+
+# حالا cache را clear کن (چون جدول cache الان وجود داره)
+php artisan cache:clear
 
 exec php artisan serve --host=0.0.0.0 --port="${PORT:-8080}"
