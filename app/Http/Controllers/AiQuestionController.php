@@ -34,31 +34,31 @@ class AiQuestionController extends Controller
         $fieldPart = $field ? " رشته {$field}" : '';
 
         $prompt = $text."\n\n".
-"این متن کتاب «{$bookName}» پایه {$grade}{$fieldPart} ایران است.
-از فصل/فصل‌های {$chapter} دقیقاً {$count} سوال تولید کن.
-سوالات را به ترتیب انواع زیر بساز (به تعداد تقریبی مساوی از هر نوع):
-1. جواب کوتاه (type: text)
-2. تشریحی (type: textarea)
-3. صحیح و غلط (type: radio با دو گزینه درست/غلط)
-4. چهارگزینه‌ای (type: radio با ۴ گزینه)
+            "این متن کتاب «{$bookName}» پایه {$grade}{$fieldPart} ایران است.
+            از فصل/فصل‌های {$chapter} دقیقاً {$count} سوال تولید کن.
+            سوالات را به ترتیب انواع زیر بساز (به تعداد تقریبی مساوی از هر نوع):
+            1. جواب کوتاه (type: text)
+            2. تشریحی (type: textarea)
+            3. صحیح و غلط (type: radio با دو گزینه درست/غلط)
+            4. چهارگزینه‌ای (type: radio با ۴ گزینه)
 
-فقط و فقط یک آبجکت JSON معتبر برگردان. هیچ توضیح، مارک‌داون یا متن اضافه ننویس.
-فرمت دقیق:
+            فقط و فقط یک آبجکت JSON معتبر برگردان. هیچ توضیح، مارک‌داون یا متن اضافه ننویس.
+            فرمت دقیق:
 
-{
-  \"questions\": [
-    {
-      \"id\": \"q1\",
-      \"type\": \"text\",
-      \"label\": \"متن سوال کوتاه اینجا\",
-      \"name\": \"q1\",
-      \"placeholder\": \"جواب کوتاه\",
-      \"required\": true,
-      \"className\": \"\",
-      \"validation\": {\"minLength\": \"\", \"maxLength\": \"\", \"pattern\": \"\"}
-    }
-  ]
-}";
+            {
+            \"questions\": [
+                {
+                \"id\": \"q1\",
+                \"type\": \"text\",
+                \"label\": \"متن سوال کوتاه اینجا\",
+                \"name\": \"q1\",
+                \"placeholder\": \"جواب کوتاه\",
+                \"required\": true,
+                \"className\": \"\",
+                \"validation\": {\"minLength\": \"\", \"maxLength\": \"\", \"pattern\": \"\"}
+                }
+            ]
+            }";
 
         $apiKey = env('API_KEY');
         $baseUrl = rtrim(env('AI_BASE_URL', 'https://api.airforce/v1'), '/');

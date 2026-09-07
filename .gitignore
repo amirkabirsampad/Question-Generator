@@ -28,3 +28,4 @@ yarn-error.log
 /.vscode
 /.zed
 public/asset/ketabhaye_darsi_txt_1404-1405
+/Dockerfile
