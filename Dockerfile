@@ -1,30 +1,37 @@
-FROM php:8.4-fpm
+FROM php:8.4-fpm AS php-base
 
 RUN apt-get update && apt-get install -y \
-    git curl libpng-dev libonig-dev libxml2-dev zip unzip sqlite3 libsqlite3-dev \
-    && docker-php-ext-install pdo pdo_sqlite mbstring exif pcntl bcmath gd
+    libpng-dev libonig-dev libsqlite3-dev sqlite3 \
+    && docker-php-ext-install pdo_sqlite mbstring exif pcntl bcmath gd \
+    && rm -rf /var/lib/apt/lists/*
 
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+WORKDIR /var/www/html
 
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
-    apt-get install -y nodejs
+FROM php-base AS builder
+
+RUN apt-get update && apt-get install -y git curl zip unzip ca-certificates \
+    && curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
+    && apt-get install -y nodejs \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 COPY . .
 
-RUN composer install --no-interaction --no-dev --optimize-autoloader
-RUN npm ci && npm run build
+RUN composer install --no-interaction --no-dev --prefer-dist --optimize-autoloader
+RUN npm ci && npm run build && rm -rf node_modules && rm -f public/hot
 
-RUN mkdir -p database && touch database/database.sqlite
+FROM php-base AS runtime
 
-RUN chown -R www-data:www-data /var/www/html/storage \
-    /var/www/html/bootstrap/cache \
-    /var/www/html/database
+WORKDIR /var/www/html
 
-# کپی و اجرایی کردن script
-COPY start.sh /start.sh
-RUN chmod +x /start.sh
+COPY --from=builder --chown=www-data:www-data /var/www/html /var/www/html
+COPY start.sh /usr/local/bin/start.sh
 
-EXPOSE 10000
+RUN chmod +x /usr/local/bin/start.sh \
+    && chown -R www-data:www-data database storage bootstrap/cache
 
-CMD ["/start.sh"]
+EXPOSE 8080
+
+CMD ["/usr/local/bin/start.sh"]
