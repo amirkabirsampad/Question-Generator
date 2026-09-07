@@ -20,7 +20,16 @@ WORKDIR /var/www/html
 COPY . .
 
 RUN composer install --no-interaction --no-dev --prefer-dist --optimize-autoloader
-RUN npm ci && npm run build && rm -rf node_modules && rm -f public/hot
+
+RUN npm ci
+
+RUN npm run build
+
+# چک کن build شده یا نه
+RUN ls -la public/build/
+
+RUN rm -rf node_modules
+RUN rm -f public/hot
 
 FROM php-base AS runtime
 
