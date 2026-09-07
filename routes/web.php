@@ -26,11 +26,12 @@ Route::get('/main', function () {
 });
 Route::get('/main/form', function () {
     return view('main.form'); // نام فایل: main/index.blade.php
-});
+})->name('form');
 Route::get('/main/editor', function () {
     return view('main.editor'); // نام فایل: main/index.blade.php
-});
-
+})->name('editor');
+Route::post('/generatepdf', [App\Http\Controllers\ExamController::class, 'generatePdf'])
+    ->name('generate.pdf');
 Route::post('/api/generate-questions', [AiQuestionController::class, 'generate'])
     ->name('ai.generate');
 

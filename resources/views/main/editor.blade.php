@@ -1716,7 +1716,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100;200;300;400;500;600;700;800;900&display=swap"
         rel="stylesheet">
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    {{-- @vite(['resources/css/app.css', 'resources/js/app.js']) --}}
 </head>
 
 <body>
@@ -1814,43 +1814,7 @@
 
 
             </aside>
-            <script>
-                // منوی باز و بسته شونده موبایل
-                document.addEventListener('DOMContentLoaded', function() {
-                    var sidebarBtn = document.getElementById('toggleSidebarBtn');
-                    var sidebarContent = document.getElementById('sidebarContent');
-                    var propertiesBtn = document.getElementById('togglePropertiesBtn');
-                    var propertiesContent = document.getElementById('propertiesPanelContent');
 
-                    function toggleMenu(content, btn) {
-                        if (window.innerWidth <= 900) {
-                            content.style.display = (content.style.display === 'none' || !content.style.display) ? 'block' :
-                                'none';
-                            btn.classList.toggle('active');
-                        }
-                    }
-
-                    sidebarBtn.addEventListener('click', function() {
-                        toggleMenu(sidebarContent, sidebarBtn);
-                    });
-                    propertiesBtn.addEventListener('click', function() {
-                        toggleMenu(propertiesContent, propertiesBtn);
-                    });
-
-                    // نمایش پیش‌فرض در دسکتاپ و مخفی در موبایل
-                    function handleResize() {
-                        if (window.innerWidth <= 900) {
-                            sidebarContent.style.display = 'none';
-                            propertiesContent.style.display = 'none';
-                        } else {
-                            sidebarContent.style.display = 'block';
-                            propertiesContent.style.display = 'block';
-                        }
-                    }
-                    window.addEventListener('resize', handleResize);
-                    handleResize();
-                });
-            </script>
 
             <main class="canvas-container">
                 <!-- Step Navigation (multi-step forms) -->
@@ -3443,6 +3407,7 @@
 
                 try {
                     // دریافت داده‌ها از localStorage
+
                     const examData = JSON.parse(localStorage.getItem('examDataForEditor') || '{}');
                     const pdfData = JSON.parse(localStorage.getItem('dataforpdf') || '{}');
 
@@ -3665,7 +3630,7 @@
                     return;
                 }
 
-                const html = this.generateExportHTML();
+                const html = this.generatePrintHTML();
                 this.downloadFile('form.html', html, 'text/html');
             }
 
@@ -4082,347 +4047,7 @@
 
                 alert(`قالب "${template.name}" با موفقیت بارگذاری شد!`);
             }
-
-            generateExportHTML() {
-                const formHTML = this.formData.map(field => this.generateFieldHTML(field)).join('');
-
-                return `<!DOCTYPE html>
-<html lang="fa" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>فرم ایجاد شده</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Vazirmatn', Tahoma, Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 2rem;
-            line-height: 1.6;
-        }
-
-        .form-container {
-            max-width: 700px;
-            margin: 0 auto;
-            background: white;
-            padding: 3rem;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .form-container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 5px;
-            background: linear-gradient(90deg, #4299e1, #667eea, #764ba2);
-        }
-
-        .form-header {
-            text-align: center;
-            margin-bottom: 2.5rem;
-            padding-bottom: 1.5rem;
-            border-bottom: 2px solid #f1f5f9;
-        }
-
-        .form-title {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #2d3748;
-            margin-bottom: 0.5rem;
-            background: linear-gradient(135deg, #4299e1, #667eea);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .form-subtitle {
-            color: #718096;
-            font-size: 1rem;
-        }
-
-        .form-group {
-            margin-bottom: 2rem;
-            position: relative;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 0.75rem;
-            font-weight: 600;
-            color: #2d3748;
-            font-size: 0.95rem;
-            transition: color 0.3s ease;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 1rem 1.25rem;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-family: inherit;
-            transition: all 0.3s ease;
-            background: #f8fafc;
-        }
-
-        .form-control:focus {
-            outline: none;
-            border-color: #4299e1;
-            background: white;
-            box-shadow: 0 0 0 4px rgba(66, 153, 225, 0.1);
-            transform: translateY(-1px);
-        }
-
-        .form-control:hover {
-            border-color: #cbd5e0;
-            background: white;
-        }
-
-        textarea.form-control {
-            resize: vertical;
-            min-height: 120px;
-        }
-
-        select.form-control {
-            cursor: pointer;
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
-            background-position: left 0.75rem center;
-            background-repeat: no-repeat;
-            background-size: 1.5em 1.5em;
-            padding-left: 3rem;
-        }
-
-        .required-indicator {
-            color: #f56565;
-            font-weight: bold;
-            margin-right: 0.25rem;
-        }
-
-        .form-check {
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem;
-            background: #f8fafc;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
-
-        .form-check:hover {
-            background: #ebf8ff;
-        }
-
-        .form-check input[type="checkbox"],
-        .form-check input[type="radio"] {
-            width: 18px;
-            height: 18px;
-            accent-color: #4299e1;
-            cursor: pointer;
-        }
-
-        .form-check-label {
-            cursor: pointer;
-            color: #2d3748;
-            font-weight: 500;
-            flex: 1;
-        }
-
-        .form-actions {
-            margin-top: 2.5rem;
-            padding-top: 2rem;
-            border-top: 2px solid #f1f5f9;
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-        }
-
-        .btn {
-            padding: 1rem 2rem;
-            background: linear-gradient(135deg, #4299e1, #667eea);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            font-size: 1.1rem;
-            font-weight: 600;
-            font-family: inherit;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            text-decoration: none;
-            box-shadow: 0 4px 12px rgba(66, 153, 225, 0.3);
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(66, 153, 225, 0.4);
-        }
-
-        .btn:active {
-            transform: translateY(0);
-        }
-
-        .btn-secondary {
-            background: linear-gradient(135deg, #718096, #4a5568);
-            box-shadow: 0 4px 12px rgba(113, 128, 150, 0.3);
-        }
-
-        .btn-secondary:hover {
-            box-shadow: 0 8px 20px rgba(113, 128, 150, 0.4);
-        }
-
-        /* رنگ‌بندی بر اساس نوع فیلد */
-        .field-text .form-label::before { content: "📝 "; }
-        .field-email .form-label::before { content: "📧 "; }
-        .field-number .form-label::before { content: "🔢 "; }
-        .field-tel .form-label::before { content: "📞 "; }
-        .field-password .form-label::before { content: "🔒 "; }
-        .field-textarea .form-label::before { content: "📄 "; }
-        .field-select .form-label::before { content: "📋 "; }
-        .field-checkbox .form-label::before { content: "☑️ "; }
-        .field-radio .form-label::before { content: "🔘 "; }
-        .field-file .form-label::before { content: "📎 "; }
-        .field-date .form-label::before { content: "📅 "; }
-        .field-range .form-label::before { content: "🎚️ "; }
-
-        /* انیمیشن‌ها */
-        .form-group {
-            animation: slideIn 0.5s ease;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            body {
-                padding: 1rem;
-            }
-
-            .form-container {
-                padding: 2rem;
-            }
-
-            .form-title {
-                font-size: 1.5rem;
-            }
-
-            .form-actions {
-                flex-direction: column;
-            }
-
-            .btn {
-                width: 100%;
-                justify-content: center;
-            }
-        }
-
-        /* Dark mode support */
-        @media (prefers-color-scheme: dark) {
-            body {
-                background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            }
-
-            .form-container {
-                background: #2d3748;
-                color: #e2e8f0;
-            }
-
-            .form-label {
-                color: #e2e8f0;
-            }
-
-            .form-control {
-                background: #4a5568;
-                border-color: #718096;
-                color: #e2e8f0;
-            }
-
-            .form-control:focus {
-                background: #2d3748;
-                border-color: #4299e1;
-            }
-
-            .form-check {
-                background: #4a5568;
-            }
-
-            .form-check:hover {
-                background: #2c5282;
-            }
-        }
-    </style>
-</head>
-<body>
-
-    <script>
-        // اضافه کردن validation و تعامل
-        document.getElementById('mainForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            // جمع‌آوری داده‌ها
-            const formData = new FormData(this);
-            const data = {};
-            for (let [key, value] of formData.entries()) {
-                data[key] = value;
-            }
-
-            // نمایش نتیجه
-            alert('فرم با موفقیت ارسال شد!\\\\n\\\\nداده‌های ارسالی:\\\\n' + JSON.stringify(data, null, 2));
-        });
-
-        // اضافه کردن افکت‌های تعاملی
-        document.querySelectorAll('.form-control').forEach(input => {
-            input.addEventListener('focus', function() {
-                this.parentElement.querySelector('.form-label').style.color = '#4299e1';
-            });
-
-            input.addEventListener('blur', function() {
-                this.parentElement.querySelector('.form-label').style.color = '#2d3748';
-            });
-        });
-
-        // انیمیشن ورود فیلدها
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.animationDelay = Math.random() * 0.3 + 's';
-                }
-            });
-        });
-
-        document.querySelectorAll('.form-group').forEach(group => {
-            observer.observe(group);
-        });
-    <\/script>
-</body>
-</html>`;
-            }
-
-            // دانلود فایل
+ // دانلود فایل
             downloadFile(filename, content, mimeType) {
                 const blob = new Blob([content], {
                     type: mimeType
@@ -4436,70 +4061,136 @@
             }
         }
 
-        // راه‌اندازی فرم ساز هنگام بارگذاری صفحه
         document.addEventListener('DOMContentLoaded', () => {
             console.log('🔄 شروع بارگذاری فرم ساز...');
 
+            // ============================================
+            // ۱. منوی موبایل (با چک وجود المان)
+            // ============================================
+            const sidebarBtn = document.getElementById('toggleSidebarBtn');
+            const sidebarContent = document.getElementById('sidebarContent');
+            const propertiesBtn = document.getElementById('togglePropertiesBtn');
+            const propertiesContent = document.getElementById('propertiesPanelContent');
+
+            function toggleMenu(content, btn) {
+                if (window.innerWidth <= 900 && content && btn) {
+                    content.style.display = (content.style.display === 'none' || !content.style.display) ? 'block' :
+                        'none';
+                    btn.classList.toggle('active');
+                }
+            }
+
+            if (sidebarBtn && sidebarContent) {
+                sidebarBtn.addEventListener('click', () => toggleMenu(sidebarContent, sidebarBtn));
+            }
+            if (propertiesBtn && propertiesContent) {
+                propertiesBtn.addEventListener('click', () => toggleMenu(propertiesContent, propertiesBtn));
+            }
+
+            function handleResize() {
+                if (window.innerWidth <= 900) {
+                    if (sidebarContent) sidebarContent.style.display = 'none';
+                    if (propertiesContent) propertiesContent.style.display = 'none';
+                } else {
+                    if (sidebarContent) sidebarContent.style.display = 'block';
+                    if (propertiesContent) propertiesContent.style.display = 'block';
+                }
+            }
+            window.addEventListener('resize', handleResize);
+            handleResize();
+
+            // ============================================
+            // ۲. راه‌اندازی فرم‌ساز
+            // ============================================
             const formBuilder = new FormBuilder();
 
-            // بارگذاری داده‌های ذخیره شده
-            const savedData = localStorage.getItem('examDataForEditor');
+            // ============================================
+            // ۳. بارگذاری از localStorage
+            // ============================================
+            try {
+                const raw = localStorage.getItem('examDataForEditor');
+                console.log('📦 محتوای خام localStorage:', raw);
 
-            if (savedData) {
-                try {
-                    const data = JSON.parse(savedData);
-                    console.log('✅ داده‌های بارگذاری شده از localStorage:', data);
+                if (!raw) {
+                    console.log('ℹ️ هیچ داده‌ای در localStorage وجود ندارد');
+                    return;
+                }
 
-                    // اگر فرمت جدید (سوالات از index.html) باشه
-                    if (data.questions && Array.isArray(data.questions)) {
-                        console.log('📚 تبدیل سوالات به فیلدهای فرم...');
+                const data = JSON.parse(raw);
+                console.log('✅ داده پارس شده:', data);
 
-                        formBuilder.formData = data.questions.map((q, idx) => ({
-                            id: `field_${idx + 1}`,
-                            type: q.type || 'multiple_choice',
-                            label: q.question || `سوال ${idx + 1}`,
-                            name: `question_${idx + 1}`,
-                            placeholder: 'پاسخ خود را وارد کنید',
-                            required: true,
-                            options: q.options || [],
-                            correct_answer: q.correct_answer,
-                            score: q.score || 1,
+                let fields = null;
+
+                // فرمت فعلی تو (data)
+                if (data.data && Array.isArray(data.data)) {
+                    fields = data.data;
+                    console.log('📌 فرمت data شناسایی شد، تعداد فیلد:', fields.length);
+                }
+                // فرمت questions (اگر بعداً استفاده کردی)
+                else if (data.questions && Array.isArray(data.questions)) {
+                    fields = data.questions.map((q, idx) => {
+                        let fieldType = 'text';
+                        if (q.type === 'multiple_choice' || q.type === 'radio') fieldType = 'radio';
+                        else if (q.type === 'textarea') fieldType = 'textarea';
+
+                        return {
+                            id: q.id || `field_${idx + 1}`,
+                            type: fieldType,
+                            label: q.question || q.label || `سوال ${idx + 1}`,
+                            name: q.name || `question_${idx + 1}`,
+                            placeholder: q.placeholder || '',
+                            required: q.required !== false,
+                            options: (q.options || []).map((opt, i) => ({
+                                value: typeof opt === 'string' ? `option${i + 1}` : (opt
+                                    .value || `option${i + 1}`),
+                                label: typeof opt === 'string' ? opt : (opt.label || opt.text ||
+                                    `گزینه ${i + 1}`)
+                            })),
                             className: '',
-                            validation: {
+                            validation: q.validation || {
                                 minLength: '',
                                 maxLength: '',
                                 pattern: ''
                             }
-                        }));
-
-                        formBuilder.fieldCounter = formBuilder.formData.length;
-                        formBuilder.renderForm();
-                        formBuilder.updateFieldCounter();
-                        formBuilder.saveToHistory();
-
-                        console.log(`✅ ${formBuilder.formData.length} سوال با موفقیت بارگذاری شد`);
-                        formBuilder.showNotification(`✅ ${formBuilder.formData.length} سوال بارگذاری شد`,
-                            'success');
-                    }
-                    // اگر فرمت قدیمی (SavedForms) باشه
-                    else if (data.data && Array.isArray(data.data)) {
-                        formBuilder.formData = data.data;
-                        formBuilder.fieldCounter = formBuilder.formData.length;
-                        formBuilder.renderForm();
-                        formBuilder.updateFieldCounter();
-                        formBuilder.saveToHistory();
-
-                        console.log('✅ فرم ذخیره شده بارگذاری شد');
-                        formBuilder.showNotification('✅ فرم ذخیره شده بارگذاری شد', 'success');
-                    }
-                } catch (e) {
-                    console.error('❌ خطا در بارگذاری داده‌ها:', e);
-                    formBuilder.showNotification('❌ خطا در بارگذاری داده‌ها', 'error');
+                        };
+                    });
+                    console.log('📌 فرمت questions شناسایی شد، تعداد فیلد:', fields.length);
                 }
-            } else {
-                console.log('ℹ️ هیچ داده‌ای در localStorage یافت نشد - فرم خالی');
+
+                if (fields && fields.length > 0) {
+                    // اطمینان از وجود validation برای همه فیلدها
+                    fields = fields.map(f => ({
+                        ...f,
+                        validation: f.validation || {
+                            minLength: '',
+                            maxLength: '',
+                            pattern: ''
+                        },
+                        options: f.options || [],
+                        className: f.className || '',
+                        placeholder: f.placeholder || '',
+                        required: !!f.required
+                    }));
+
+                    formBuilder.formData = fields;
+                    formBuilder.fieldCounter = fields.length;
+
+                    // رندر کردن
+                    formBuilder.renderForm();
+                    formBuilder.updateFieldCounter();
+                    formBuilder.saveToHistory();
+
+                    console.log('🎉 فرم با موفقیت رندر شد. تعداد فیلدها:', formBuilder.formData.length);
+                    formBuilder.showNotification(`✅ ${fields.length} سوال بارگذاری شد`, 'success');
+                } else {
+                    console.warn('⚠️ هیچ فیلدی برای نمایش پیدا نشد');
+                }
+
+            } catch (err) {
+                console.error('❌ خطا در بارگذاری فرم:', err);
+                formBuilder.showNotification('❌ خطا در بارگذاری داده‌ها', 'error');
             }
-        })
+        });
     </script>
 </body>
 

@@ -62,7 +62,7 @@ class AiQuestionController extends Controller
 
         $apiKey = env('API_KEY');
         $baseUrl = rtrim(env('AI_BASE_URL', 'https://api.airforce/v1'), '/');
-        $model = env('AI_MODEL', 'mistral-medium-3.5');
+        $model = env('AI_MODEL', 'codestral-2508');
 
         if (! $apiKey) {
             return response()->json(['error' => 'API_KEY در .env تنظیم نشده'], 500);
@@ -179,6 +179,6 @@ class AiQuestionController extends Controller
                 'detail' => $response ? mb_substr($response->body(), 0, 300) : null,
             ], 429);
         }
-        
+
     }
 }

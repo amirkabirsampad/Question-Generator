@@ -1261,7 +1261,7 @@
                     }
 
                     log('تعداد سوالات:', questions.length);
-
+                    console.log(questions)
                     // ۳) localStorage
                     const now = new Date().toISOString();
                     const examId = 'exam_' + Date.now();
@@ -1281,7 +1281,7 @@
                         teacherName: teacherName,
                         field: field
                     };
-
+                    console.log("data:",dataforpdf , editorData);
                     localStorage.setItem('examDataForEditor', JSON.stringify(editorData));
                     localStorage.setItem('dataforpdf', JSON.stringify(dataforpdf));
                     log('localStorage ذخیره شد');
@@ -1290,7 +1290,7 @@
                         'success');
 
                     setTimeout(function() {
-                        window.location.href = 'main/editor';
+                        window.location.href = '{{ route("editor") }}';
                     }, 800);
 
                 } catch (err) {
