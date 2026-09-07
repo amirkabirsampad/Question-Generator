@@ -1,45 +1,40 @@
-FROM php:8.4-fpm AS php-base
+FROM php:8.4-cli
 
 RUN apt-get update && apt-get install -y \
     libpng-dev libonig-dev libsqlite3-dev sqlite3 \
+    curl zip unzip git ca-certificates \
     && docker-php-ext-install pdo_sqlite mbstring exif pcntl bcmath gd \
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /var/www/html
-
-FROM php-base AS builder
-
-RUN apt-get update && apt-get install -y git curl zip unzip ca-certificates \
-    && curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
+# نصب Node.js
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
     && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
+# نصب Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
+
 COPY . .
 
+# نصب پکیج‌های PHP
 RUN composer install --no-interaction --no-dev --prefer-dist --optimize-autoloader
 
-RUN npm ci
+# Build فرانت‌اند
+RUN npm ci && npm run build
 
-RUN npm run build
+# چک کن build شده
+RUN ls -la public/build/ && cat public/build/manifest.json
 
-# چک کن build شده یا نه
-RUN ls -la public/build/
+# حذف node_modules
+RUN rm -rf node_modules && rm -f public/hot
 
-RUN rm -rf node_modules
-RUN rm -f public/hot
+# تنظیم permission
+RUN chown -R www-data:www-data storage bootstrap/cache
 
-FROM php-base AS runtime
-
-WORKDIR /var/www/html
-
-COPY --from=builder --chown=www-data:www-data /var/www/html /var/www/html
 COPY start.sh /usr/local/bin/start.sh
-
-RUN chmod +x /usr/local/bin/start.sh \
-    && chown -R www-data:www-data database storage bootstrap/cache
+RUN chmod +x /usr/local/bin/start.sh
 
 EXPOSE 8080
 
