@@ -136,7 +136,7 @@
             transform: translateY(0);
         }
     </style>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    {{-- @vite(['resources/css/app.css', 'resources/js/app.js']) --}}
 </head>
 
 <body class="font-vazir bg-white text-slate-800 dark:bg-slate-900 dark:text-slate-100 overflow-x-hidden">

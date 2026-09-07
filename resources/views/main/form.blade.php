@@ -933,7 +933,7 @@
     <script src="/_sdk/element_sdk.js" type="text/javascript"></script>
     {{-- <script src="https://cdn.tailwindcss.com" type="text/javascript"></script> --}}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    {{-- @vite(['resources/css/app.css', 'resources/js/app.js']) --}}
 </head>
 
 <body>
