@@ -65,9 +65,31 @@
 
         body.dark-mode .form-control,
         body.dark-mode .form-select {
-            background: #1a202c;
+            background-color: #1a202c;
             color: var(--text-primary);
             border-color: var(--border-color);
+        }
+
+        body.dark-mode .form-select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23a0aec0' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: left 1rem center;
+            background-color: #1a202c;
+        }
+
+        body.dark-mode .form-select:hover {
+            background-color: #2d3748;
+            border-color: #4a5568;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23a0aec0' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: left 1rem center;
+        }
+
+        body.dark-mode .form-select:focus {
+            background-color: #1a202c;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23a0aec0' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: left 1rem center;
         }
 
         /* App Container */
@@ -334,14 +356,40 @@
             font-family: inherit;
             font-size: 0.95rem;
             transition: all 0.3s ease;
-            background: white;
+            background-color: white;
+        }
+
+        .form-select {
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23667eea' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: left 1rem center;
+            padding-left: 2.5rem;
+        }
+
+        .form-select:hover {
+            border-color: #a3bffa;
+            background-color: #f8fafc;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23667eea' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: left 1rem center;
         }
 
         .form-control:focus,
         .form-select:focus {
             outline: none;
             border-color: #4299e1;
-            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
+            background-color: #fff;
+        }
+
+        .form-select:focus {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23667eea' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: left 1rem center;
         }
 
         .form-control::placeholder {
@@ -1002,8 +1050,8 @@
                                 <div class="form-group">
                                     <div class="book-grid" id="bookGrid"></div>
                                     <div id="selected-book-banner">
-                                        <div class="sb-title"><i class="fas fa-check-circle"></i> کتاب انتخاب‌شده: <span
-                                                id="sb-name"></span></div>
+                                        <div class="sb-title"><i class="fas fa-check-circle"></i> کتاب انتخاب‌شده:
+                                            <span id="sb-name"></span></div>
                                         <div class="sb-url" id="sb-url"></div>
                                     </div>
                                     <input type="hidden" id="book_url" name="book_url">
@@ -1021,7 +1069,8 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="chapter" class="form-label"><i class="fas fa-layer-group"></i> فصل
+                                        <label for="chapter" class="form-label"><i class="fas fa-layer-group"></i>
+                                            فصل
                                         </label>
                                         <input type="text" class="form-control" id="chapter" name="chapter"
                                             placeholder="مثال: ۱، ۲، ۳">
@@ -1056,6 +1105,35 @@
                                             معلم</label>
                                         <input type="text" class="form-control" id="teacher_name"
                                             name="teacher_name" placeholder="استاد احمدی">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="difficulty" class="form-label"><i class="fas fa-bolt"></i> سطح
+                                            سوالات</label>
+                                        <select class="form-select" id="difficulty" name="difficulty">
+                                            <option value="easy">🌱 آسان</option>
+                                            <option value="medium" selected>⚖️ متوسط</option>
+                                            <option value="hard">🔥 سخت</option>
+                                            <option value="stormy">⚡ طوفانی</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="mode" class="form-label"><i class="fas fa-random"></i>
+                                            حالت</label>
+                                        <select class="form-select" id="mode" name="mode">
+                                            <option value="🎯 حالت نرمال" selected>🎯 حالت نرمال</option>
+                                            <option value="📝 کنکوری | فقط سوالات تستی">📝 کنکوری | فقط سوالات تستی
+                                            </option>
+                                            <option value="✍️ امتحانی | بیشتر سوالات تشریحی">✍️ امتحانی | بیشتر سوالات
+                                                تشریحی</option>
+                                            <option value="🎲 تصادفی">🎲 تصادفی</option>
+                                        </select>
                                     </div>
                                 </div>
                             </div>
@@ -1167,6 +1245,8 @@
                 const count = document.getElementById('count')?.value || '10';
                 const schoolName = (document.getElementById('school_name')?.value || '').trim();
                 const teacherName = (document.getElementById('teacher_name')?.value || '').trim();
+                const difficulty = document.getElementById('difficulty')?.value || 'medium';
+                const mode = document.getElementById('mode')?.value || 'normal';
 
                 log('مقادیر فرم:', {
                     grade,
@@ -1174,7 +1254,9 @@
                     bookUrl,
                     bookName,
                     chapter,
-                    count
+                    count,
+                    difficulty,
+                    mode
                 });
 
                 if (!grade) return showAlert('پایه تحصیلی را انتخاب کنید!', 'danger');
@@ -1228,7 +1310,9 @@
                                 grade: grade,
                                 field: field,
                                 chapter: chapter,
-                                count: parseInt(count, 10)
+                                count: parseInt(count, 10),
+                                difficulty: difficulty,
+                                mode: mode
                             })
                         }, 100000);
 
@@ -1279,9 +1363,11 @@
                         grade: grade,
                         schoolName: schoolName,
                         teacherName: teacherName,
-                        field: field
+                        field: field,
+                        difficulty: difficulty,
+                        mode: mode
                     };
-                    console.log("data:",dataforpdf , editorData);
+                    console.log("data:", dataforpdf, editorData);
                     localStorage.setItem('examDataForEditor', JSON.stringify(editorData));
                     localStorage.setItem('dataforpdf', JSON.stringify(dataforpdf));
                     log('localStorage ذخیره شد');
@@ -1290,7 +1376,7 @@
                         'success');
 
                     setTimeout(function() {
-                        window.location.href = '{{ route("editor") }}';
+                        window.location.href = '{{ route('editor') }}';
                     }, 800);
 
                 } catch (err) {
@@ -1465,9 +1551,9 @@
     </script>
     <script>
         /* ═══════════════════════════════════════════════════════════════
-                                                               BOOKS DATABASE — همگام با BOOKS پایتون
-                                                               مسیر لوکال: asset/ketabhaye_darsi_txt_1404-1405/...
-                                                            ═══════════════════════════════════════════════════════════════ */
+                                                                   BOOKS DATABASE — همگام با BOOKS پایتون
+                                                                   مسیر لوکال: asset/ketabhaye_darsi_txt_1404-1405/...
+                                                                ═══════════════════════════════════════════════════════════════ */
 
         // تابع کمکی برای ساخت URL لوکال
         const localPath = (folder, filename) =>
@@ -3428,6 +3514,8 @@
                 count: document.getElementById("count").value,
                 school_name: document.getElementById("school_name").value,
                 teacher_name: document.getElementById("teacher_name").value,
+                difficulty: document.getElementById("difficulty")?.value || 'medium',
+                mode: document.getElementById("mode")?.value || 'normal',
             };
 
             console.log("📤 ارسال به سرور:", payload);

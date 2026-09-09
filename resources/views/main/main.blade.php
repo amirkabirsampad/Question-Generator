@@ -686,7 +686,7 @@
             mx-auto text-center relative z-10">
             <h2 class="text-4xl md:text-5xl font-black text-white mb-6">همین الان شروع کنید! 🚀</h2>
             <p class="text-xl text-white/95 mb-10">هزاران معلم به ما اعتماد کرده‌اند. شما هم بپیوندید!</p>
-            <a href="/form"
+            <a href="/main/form"
                 class="inline-flex items-center gap-3 px-12 py-5 bg-white text-primary font-bold text-xl rounded-xl shadow-xl hover:-translate-y-1 hover:shadow-2xl transition-all">
                 <i class="fas fa-rocket"></i>
                 تولید سوال رایگان

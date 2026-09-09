@@ -25,6 +25,8 @@ class AiQuestionController extends Controller
         $field = $request->input('field', '');
         $chapter = $request->input('chapter', 'همه');
         $count = (int) $request->input('count', 10);
+        $difficulty = (int) $request->input('difficulty', "normal");
+        $mode = (int) $request->input('mode', "normal");
 
         // کوتاه کردن متن برای جلوگیری از overflow
         if (mb_strlen($text) > 12000) {
@@ -35,7 +37,7 @@ class AiQuestionController extends Controller
 
         $prompt = $text."\n\n".
             "این متن کتاب «{$bookName}» پایه {$grade}{$fieldPart} ایران است.
-            از فصل/فصل‌های {$chapter} دقیقاً {$count} سوال تولید کن.
+            از فصل/فصل‌های {$chapter} دقیقاً {$count} سوال تولید کن. سطح سوالات باید {$difficulty} و حالت سوالات ، {$mode} باشد
             سوالات را به ترتیب انواع زیر بساز (به تعداد تقریبی مساوی از هر نوع):
             1. جواب کوتاه (type: text)
             2. تشریحی (type: textarea)
