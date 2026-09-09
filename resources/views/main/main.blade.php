@@ -341,7 +341,7 @@
                     1
                 </div>
                 <div class="text-center md:text-right">
-                    <h3 class="text-2xl font-bold text-slate-800 dark:text-white mb-3">PDF درس را آپلود کنید</h3>
+                    <h3 class="text-2xl font-bold text-slate-800 dark:text-white mb-3">درس خود را انتخاب کنید</h3>
                     <p class="text-lg text-slate-500 dark:text-slate-400 leading-relaxed">فایل PDF جزوه یا کتاب درسی
                         خود را در سیستم بارگذاری کنید. حداکثر حجم ۱۶ مگابایت</p>
                 </div>
