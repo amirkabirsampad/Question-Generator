@@ -1737,9 +1737,6 @@
                     <button class="btn btn-icon" id="undoBtn" title="بازگشت (Ctrl+Z)">
                         <i class="fas fa-undo"></i>
                     </button>
-                    <button class="btn btn-icon" id="redoBtn" title="جلو (Ctrl+Y)">
-                        <i class="fas fa-redo"></i>
-                    </button>
                     <div class="header-divider"></div>
                     <button class="btn btn-secondary" id="templatesBtn">
                         <i class="fas fa-layer-group"></i>
@@ -1752,6 +1749,9 @@
                     <button class="btn btn-success" id="saveBtn">
                         <i class="fas fa-print"></i>
                         <span>چاپ</span>
+                    </button>
+                    <button class="btn btn-icon" id="redoBtn" title="جلو (Ctrl+Y)">
+                        <i class="fas fa-redo"></i>
                     </button>
                     <!-- <button class="btn btn-primary" id="loadBtn">
                         <i class="fas fa-folder-open"></i>

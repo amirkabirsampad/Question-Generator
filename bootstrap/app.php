@@ -24,6 +24,23 @@ return Application::configure(basePath: dirname(__DIR__))
             AddLinkHeadersForPreloadedAssets::class,
             SetTeamUrlDefaults::class,
         ]);
+
+    $middleware->redirectGuestsTo('/auth');
+
+    $middleware->redirectUsersTo(function () {
+        $user = auth()->user();
+
+        if ($user && $user->current_team_id) {
+            $team = $user->currentTeam;
+
+            if ($team) {
+                $key = $team->slug ?? $team->id;
+                return '/' . $key . '/dashboard';
+            }
+        }
+
+        return '/';
+    });
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
