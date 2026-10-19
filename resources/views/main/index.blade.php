@@ -315,65 +315,6 @@
             </a>
         </div>
     </section>
-
-    <!-- Footer -->
-    <footer class="py-12 px-8 bg-slate-800 text-white text-center">
-        <div class="container-abu">
-
-            <div class="containerA1">
-                <a href="https://www.instagram.com/radin2008official?igsh=dWE4Y3c4Zmx2eDM0" class="abuot">
-
-
-                    <div class="cardssss" style="--color: #ef476f;">
-                        <i class="fa fa-instagram" aria-hidden="true"></i>
-                        <div class="title">Instegram</div>
-                        <div class="description">من در اینستگرام؛ تیکه هایی موزیک ،و فعالیت برنامه نویسی مو ارائه میدهم
-                            فعالیت چندانی ندارم، با فالو کردن روحیه مو تقویت کنید . </div>
-                    </div>
-
-                </a>
-                <a href="https://soundcloud.com/user-757535903?ref=clipboard&p=a&c=1&si=f6ac030cf7eb413ab6f32565cea9079f&utm_source=clipboard&utm_medium=text&utm_campaign=social_sharing"
-                    class="abuot">
-
-
-                    <div class="cardssss" style="--color: #ffd23f;">
-                        <i class="fa fa-soundcloud" aria-hidden="true"></i>
-                        <div class="title">SoundCloud</div>
-                        <div class="description">تمامی موزیک های خود را در ساند کلاد آپلود میکنم. <br>آنجا هم میتوانید
-                            کارهای من را گوش کنید...</div>
-                    </div>
-                </a>
-            </div>
-            <div class="containerA2">
-                <a href="https://t.me/Khode333khoda" class="abuot">
-
-
-
-                    <div class="cardssss" style="--color: #00a6ed;">
-                        <i class="fa fa-telegram" aria-hidden="true"></i>
-                        <div class="title">Telegram</div>
-                        <div class="description">اگر برای دانلود موزیک هایم، صحبت یا هر چیز دیگر... <br> به من در
-                            تلگرام پیام دهید.</div>
-                    </div>
-
-                </a>
-                <a href="https://github.com/mohammadHasanHakemi" class="abuot">
-
-
-                    <div class="cardssss" style="--color: #8812d6;">
-                        <i class="fa fa-github" aria-hidden="true"></i>
-                        <div class="title">GitHub</div>
-                        <div class="description">پروژه های برنامه نویسیم به طور open source اینجا آپلود میشود.</div>
-                    </div>
-                </a>
-            </div>
-        </div>
-        <div class="max-w-6xl mx-auto">
-            <p class="opacity-80"> ساخته شده با ❤️ برای جامعه توسعه‌دهندگان ایرانی توسط محمد حسن حاکمی</p>
-            <p class="mt-4 opacity-60">نسخه 2.5 - Dashboard Edition</p>
-        </div>
-    </footer>
-
 </body>
 
 </html>

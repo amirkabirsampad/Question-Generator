@@ -2021,7 +2021,6 @@
                     this.showNotification('بازگشت انجام شد', 'success');
                 }
             }
-
             // Redo Function
             redo() {
                 if (this.historyIndex < this.history.length - 1) {
@@ -2046,29 +2045,39 @@
                 }
             }
 
-            // Save to LocalStorage
             saveToLocalStorage() {
-                // 1. دریافت داده‌ها از localStorage
-                let data = localStorage.getItem('examDataForEditor');
+                let data = null;
+                const raw = localStorage.getItem('examDataForEditor');
 
-                // 2. تبدیل رشته JSON به شیء جاوااسکریپتی (اگر داده‌ها به صورت JSON ذخیره شده‌اند)
-                if (data) {
-                    data = JSON.parse(data); // تبدیل رشته به شیء
-                } else {
-                    // اگر داده‌ای وجود ندارد، یک شیء جدید بسازید
+                if (raw) {
+                    try {
+                        data = JSON.parse(raw);
+                    } catch (e) {
+                        console.warn('⚠️ داده نامعتبر در localStorage، بازنشانی می‌شود', e);
+                        data = null;
+                    }
+                }
+
+                // اگر داده معتبر نبود یا وجود نداشت، ساختار پیش‌فرض بساز
+                if (!data || typeof data !== 'object' || Array.isArray(data)) {
                     data = {
                         id: 'edited',
-                        name: 'Edited Form',
-                        data: {},
+                        name: 'فرم جدید',
+                        data: [],
                         createdAt: new Date().toISOString(),
                         updatedAt: new Date().toISOString()
                     };
                 }
 
-                // 3. فقط بخش مورد نظر را تغییر دهید (مثال: تغییر نام)
-                data.data = this.formData; // فقط نام را تغییر می‌دهی
+                // به‌روزرسانی فیلدها
+                data.data = this.formData || [];
                 data.updatedAt = new Date().toISOString();
-                // 5. دوباره در localStorage ذخیره کنید
+
+                // اطمینان از وجود فیلدهای ضروری
+                if (!data.id) data.id = 'edited';
+                if (!data.name) data.name = 'فرم جدید';
+                if (!data.createdAt) data.createdAt = new Date().toISOString();
+
                 localStorage.setItem('examDataForEditor', JSON.stringify(data));
             }
 
@@ -3400,26 +3409,28 @@
                 }
             }
 
-            // ذخیره فرم و تولید PDF
             async saveForm() {
-                // ذخیره تغییرات فعلی در localStorage
                 this.saveToLocalStorage();
 
                 try {
-                    // دریافت داده‌ها از localStorage
-
                     const examData = JSON.parse(localStorage.getItem('examDataForEditor') || '{}');
-                    const pdfData = JSON.parse(localStorage.getItem('dataforpdf') || '{}');
 
                     if (!examData.data || examData.data.length === 0) {
-                        alert('هیچ سوالی برای تولید PDF وجود ندارد!');
+                        alert('هیچ سوالی برای تولید PDF وجود ندارد! ابتدا فیلد اضافه کنید.');
                         return;
                     }
 
-                    // نمایش لودینگ
+                    // خواندن pdfData با مقادیر پیش‌فرض
+                    let pdfData = {};
+                    try {
+                        pdfData = JSON.parse(localStorage.getItem('dataforpdf') || '{}');
+                    } catch (e) {
+                        console.warn('⚠️ dataforpdf نامعتبر است، از مقادیر پیش‌فرض استفاده می‌شود');
+                        pdfData = {};
+                    }
+
                     this.showNotification('در حال تولید PDF...', 'info');
 
-                    // ارسال درخواست به بک‌اند
                     const response = await fetch('/generatepdf', {
                         method: 'POST',
                         headers: {
@@ -3427,36 +3438,32 @@
                         },
                         body: JSON.stringify({
                             questions: examData.data,
-                            subject: pdfData.subject,
-                            grade: pdfData.grade,
-                            chapter: pdfData.chapter,
-                            school_name: pdfData.schoolName,
-                            teacher_name: pdfData.teacherName,
-                            exam_name: examData.name
+                            subject: pdfData.subject || 'آزمون',
+                            grade: pdfData.grade || '',
+                            chapter: pdfData.chapter || '',
+                            school_name: pdfData.schoolName || pdfData.school_name || '',
+                            teacher_name: pdfData.teacherName || pdfData.teacher_name || '',
+                            exam_name: examData.name || 'آزمون جدید'
                         })
                     });
 
                     if (response.ok) {
                         const html = await response.text();
-
-                        // باز کردن HTML در پنجره جدید برای پرینت
                         const newWindow = window.open('', '_blank');
                         newWindow.document.write(html);
                         newWindow.document.close();
 
-                        // منتظر بارگذاری و سپس پرینت
                         newWindow.onload = () => {
                             setTimeout(() => {
                                 newWindow.print();
-                                // newWindow.close(); // کاربر خودش ببنده
                             }, 500);
                         };
 
                         this.showNotification(
-                            '✅ HTML آزمون آماده پرینت است! از منوی پرینت مرورگر، "Save as PDF" را انتخاب کنید.',
-                            'success');
+                            '✅ HTML آزمون آماده پرینت است! از منوی پرینت، "Save as PDF" را انتخاب کنید.',
+                            'success'
+                        );
                     } else {
-                        // در صورت خطا، سعی کن JSON بخوانیم
                         const errorText = await response.text();
                         try {
                             const error = JSON.parse(errorText);
@@ -3470,7 +3477,6 @@
                     this.showNotification('خطا در تولید HTML: ' + error.message, 'error');
                 }
             }
-
             // نمایش modal بارگذاری
             showLoadModal() {
                 this.loadSavedForms();
@@ -4047,7 +4053,7 @@
 
                 alert(`قالب "${template.name}" با موفقیت بارگذاری شد!`);
             }
- // دانلود فایل
+            // دانلود فایل
             downloadFile(filename, content, mimeType) {
                 const blob = new Blob([content], {
                     type: mimeType
@@ -4065,7 +4071,7 @@
             console.log('🔄 شروع بارگذاری فرم ساز...');
 
             // ============================================
-            // ۱. منوی موبایل (با چک وجود المان)
+            // ۱. منوی موبایل
             // ============================================
             const sidebarBtn = document.getElementById('toggleSidebarBtn');
             const sidebarContent = document.getElementById('sidebarContent');
@@ -4100,33 +4106,32 @@
             handleResize();
 
             // ============================================
-            // ۲. راه‌اندازی فرم‌ساز
+            // ۲. ساخت فرم‌ساز  ← باید قبل از بارگذاری باشد
             // ============================================
             const formBuilder = new FormBuilder();
+            window.formBuilder = formBuilder; // برای دیباگ از کنسول
 
             // ============================================
-            // ۳. بارگذاری از localStorage
+            // ۳. بارگذاری داده از localStorage (اختیاری)
             // ============================================
             try {
                 const raw = localStorage.getItem('examDataForEditor');
-                console.log('📦 محتوای خام localStorage:', raw);
 
                 if (!raw) {
-                    console.log('ℹ️ هیچ داده‌ای در localStorage وجود ندارد');
+                    console.log('ℹ️ localStorage خالی است - ادیتور خالی آماده است');
+                    formBuilder.showNotification('ادیتور آماده است - می‌توانید فیلد اضافه کنید', 'info');
                     return;
                 }
 
                 const data = JSON.parse(raw);
-                console.log('✅ داده پارس شده:', data);
-
                 let fields = null;
 
-                // فرمت فعلی تو (data)
+                // فرمت ۱: data.data (فرمت فعلی)
                 if (data.data && Array.isArray(data.data)) {
                     fields = data.data;
-                    console.log('📌 فرمت data شناسایی شد، تعداد فیلد:', fields.length);
+                    console.log('📌 فرمت data شناسایی شد:', fields.length);
                 }
-                // فرمت questions (اگر بعداً استفاده کردی)
+                // فرمت ۲: data.questions (فرمت قدیمی)
                 else if (data.questions && Array.isArray(data.questions)) {
                     fields = data.questions.map((q, idx) => {
                         let fieldType = 'text';
@@ -4154,12 +4159,12 @@
                             }
                         };
                     });
-                    console.log('📌 فرمت questions شناسایی شد، تعداد فیلد:', fields.length);
+                    console.log('📌 فرمت questions شناسایی شد:', fields.length);
                 }
 
                 if (fields && fields.length > 0) {
-                    // اطمینان از وجود validation برای همه فیلدها
-                    fields = fields.map(f => ({
+                    // نرمال‌سازی
+                    formBuilder.formData = fields.map(f => ({
                         ...f,
                         validation: f.validation || {
                             minLength: '',
@@ -4171,24 +4176,21 @@
                         placeholder: f.placeholder || '',
                         required: !!f.required
                     }));
-
-                    formBuilder.formData = fields;
                     formBuilder.fieldCounter = fields.length;
 
-                    // رندر کردن
                     formBuilder.renderForm();
                     formBuilder.updateFieldCounter();
                     formBuilder.saveToHistory();
 
-                    console.log('🎉 فرم با موفقیت رندر شد. تعداد فیلدها:', formBuilder.formData.length);
+                    console.log('🎉 فرم رندر شد. تعداد فیلد:', formBuilder.formData.length);
                     formBuilder.showNotification(`✅ ${fields.length} سوال بارگذاری شد`, 'success');
                 } else {
-                    console.warn('⚠️ هیچ فیلدی برای نمایش پیدا نشد');
+                    console.log('ℹ️ داده خالی است - ادیتور خالی آماده است');
                 }
 
             } catch (err) {
-                console.error('❌ خطا در بارگذاری فرم:', err);
-                formBuilder.showNotification('❌ خطا در بارگذاری داده‌ها', 'error');
+                console.error('❌ خطا در بارگذاری:', err);
+                formBuilder.showNotification('❌ خطا در بارگذاری داده‌ها - ادیتور خالی شروع شد', 'error');
             }
         });
     </script>
